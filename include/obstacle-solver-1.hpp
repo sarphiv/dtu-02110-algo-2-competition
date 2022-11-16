@@ -16,7 +16,6 @@ private:
     const std::vector<zone_idx_t>& x_idx;
     const std::vector<zone_idx_t>& y_idx;
 
-    void solve(const std::vector<zone_coord_t>& val, const std::vector<zone_idx_t>& idx);
     void connect_range
     (
         const std::vector<zone_coord_t>& val, 

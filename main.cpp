@@ -63,12 +63,18 @@ int main()
 
 
 
-
+    // Sort x by 
     // TODO: Construct zones sorted by x, y in O(n log n) (low constant) 
     //  via looping through x, if sequence of same, add to heap sorted by y,
     //  once new stuff or end, dequeue from heap
 
+    // Remember to update all indexes
+
+
     // TODO: Solve convex hull
+
+
+    
 
     // TODO: Solve obstacle 3
 

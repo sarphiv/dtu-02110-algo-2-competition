@@ -1,4 +1,5 @@
 #include "common.hpp"
+#include "common-templates.hpp"
 #include "obstacle-solver-1.hpp"
 
 
@@ -27,40 +28,22 @@ void ObstacleSolver1::connect_range(const std::vector<zone_coord_t>& val, const 
 }
 
 
-void ObstacleSolver1::solve(const std::vector<zone_coord_t>& val, const std::vector<zone_idx_t>& idx)
-{
-    zone_idx_t zone_count = zones.size();
-
-    // Find all sequences of common values 
-    //  by iterating over sorted values 
-    //  and finding sequences of equal values
-    zone_idx_t start = 0;
-    zone_idx_t end = 0;
-    zone_coord_t prev_val = val[idx[0]];
-
-    for (zone_idx_t i = 1; i < zone_count; i++)
-    {
-        if (prev_val != val[i])
-        {
-            if (start != end)
-                connect_range(val, idx, start, end);
-
-            start = end;
-            prev_val = val[i];
-        }
-
-        end = i;
-    }
-
-
-    // If there is a final sequence, connect it
-    if (start != end)
-        connect_range(val, idx, start, end);
-}
-
-
 void ObstacleSolver1::solve()
 {
-    solve(x_sorted, x_idx);
-    solve(y_sorted, y_idx);
+    find_sequences<zone_coord_t, zone_idx_t>
+    (
+        x_sorted, 
+        [&](const zone_idx_t &start, const zone_idx_t &end)
+        { 
+            connect_range(x_sorted, x_idx, start, end); 
+        }
+    );
+    find_sequences<zone_coord_t, zone_idx_t>
+    (
+        y_sorted, 
+        [&](const zone_idx_t &start, const zone_idx_t &end)
+        { 
+            connect_range(y_sorted, y_idx, start, end); 
+        }
+    );
 }

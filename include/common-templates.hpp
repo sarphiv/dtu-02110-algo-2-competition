@@ -98,6 +98,44 @@ argsort(std::vector<TData>& data)
 
 
 
+template <typename TData, typename TIndex>
+void find_sequences
+(
+    const std::vector<TData>& val,
+    const std::function<void
+    (
+        const TIndex&, const TIndex&
+    )>& process_sequence
+)
+{
+    TIndex size = val.size();
+
+    // Find all sequences of common values 
+    //  by iterating over sorted values 
+    //  and finding sequences of equal values
+    TIndex start = 0;
+    TIndex end = 0;
+    TData prev_val = val[0];
+
+    for (TIndex i = 1; i < size; i++)
+    {
+        if (prev_val != val[i])
+        {
+            if (start != end)
+                process_sequence(start, end);
+
+            start = end;
+            prev_val = val[i];
+        }
+
+        end = i;
+    }
+
+
+    // If there is a final sequence, mutate it
+    if (start != end)
+        process_sequence(start, end);
+}
 
 
 
