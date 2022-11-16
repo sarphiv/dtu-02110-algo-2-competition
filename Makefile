@@ -1,12 +1,12 @@
 CC = gcc
-CPPFLAGS = 
+CPPFLAGS = -Iinclude
 CFLAGS = -Wall -O3
 LDFLAGS = -L.
 LDLIBS = 
 
 .PHONY: clean
 
-main: common.o max-flow.o obstacle-1.o obstacle-4.o
+main: obstacle-solver-1.o obstacle-solver-2.o obstacle-solver-3.o obstacle-solver-4.o graph-builder.o flow-graph.o
 
 clean:
 	-$(RM) *.o main

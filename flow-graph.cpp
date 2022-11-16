@@ -1,4 +1,4 @@
-#include "max-flow.hpp"
+#include "flow-graph.hpp"
 
 
 FlowGraph::FlowGraph(const node_idx_t& source, const node_idx_t& terminal)
