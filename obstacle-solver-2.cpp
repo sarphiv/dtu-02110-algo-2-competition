@@ -40,11 +40,11 @@ std::tuple<std::vector<ZoneInfo>, std::vector<zone_idx_t>> ObstacleSolver2::find
 	}
 
 
-    // Note: the last point in the vector is the same as the first one.
+    // Note: the last zone in the vector is the same as the first one.
 	hull.resize(k-1);
     hull_idx.resize(k-1);
 
-    // Returns a list of points on the convex hull in counter-clockwise order.
+    // Returns a vector of points on the convex hull in counter-clockwise order.
 	return {hull, hull_idx};
 }
 

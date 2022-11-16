@@ -46,16 +46,21 @@ load_zones()
 
 int main()
 {
-    // Load zones, sort y, and then sort x by x then y
+    // Load zones and separate out coordinates
     auto [zones, x, y] = load_zones();
+
+
+    // Sort y, and then sort x by x then y
     auto [y_idx, y_idx_inv] = argsort<zone_coord_t, zone_idx_t>(y, true);
-    auto [x_idx, x_idx_inv] = argsort<zone_coord_t, zone_idx_t>(
+    auto [x_idx, x_idx_inv] = argsort<zone_coord_t, zone_idx_t>
+    (
         x,
         [&](const zone_idx_t &a, const zone_idx_t &b)
         {
             return x[a] < x[b] || (x[a] == x[b] && y_idx_inv[a] < y_idx_inv[b]);
         },
-        true);
+        true
+    );
 
     // Make zones inherit order of x
     const auto& zones_idx = x_idx;
@@ -80,11 +85,8 @@ int main()
     ObstacleSolver2 solver_2(graph_builder, zones, zones_idx);
     solver_2.solve();
 
-
-
-
-    // TODO: Solve obstacle 3
-
+    ObstacleSolver3 solver_3(graph_builder, zones, zones_idx);
+    solver_3.solve();
 
     // TODO: Make graph builder build method
 
