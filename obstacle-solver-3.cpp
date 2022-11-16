@@ -24,7 +24,8 @@ struct Line
 
 namespace std 
 {
-  struct hash<Line>
+    template <>
+    struct hash<Line>
     {
         std::size_t operator()(const Line& l) const
         {

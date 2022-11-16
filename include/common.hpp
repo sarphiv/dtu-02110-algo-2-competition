@@ -6,22 +6,22 @@ using zone_coord2_t = unsigned long long;
 using zone_idx_t = unsigned int;
 using zone_capacity_t = unsigned int;
 
-
-enum ZoneObstacle
+using zone_obstacle_val_t = unsigned char;
+enum ZoneObstacle : zone_obstacle_val_t
 {
     O1 = 0,
     O2 = 1,
     O3 = 2,
-    O4 = 3,
-    Max = O4
+    O4 = 3
 };
+#define ZONE_OBSTACLE_SIZE (O4+1)
 
 
 struct ZoneInfo
 {
     zone_coord_t x;
     zone_coord_t y;
-    zone_capacity_t capacity[ZoneObstacle::Max];
+    zone_capacity_t capacity[ZONE_OBSTACLE_SIZE];
 };
 
 

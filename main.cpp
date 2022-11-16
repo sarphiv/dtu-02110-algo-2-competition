@@ -74,7 +74,7 @@ int main()
 
 
     // Build graph via solvers
-    GraphBuilder graph_builder;
+    GraphBuilder graph_builder(zones, zones_idx);
 
     ObstacleSolver4 solver_4(graph_builder, zones);
     solver_4.solve();
@@ -87,8 +87,6 @@ int main()
 
     ObstacleSolver3 solver_3(graph_builder, zones, zones_idx);
     solver_3.solve();
-
-    // TODO: Make graph builder build method
 
 
     // Construct regular graph edges
