@@ -18,10 +18,10 @@ private:
 
     zone_coord_dist_t dist(const ZoneInfo &a, const ZoneInfo &b)
     {
-        zone_coord2_t dx = (zone_coord2_t)a.x - b.x;
-        zone_coord2_t dy = (zone_coord2_t)a.y - b.y;
+        zone_coord2_t dx = (zone_coord2_t)a.x - (zone_coord2_t)b.x;
+        zone_coord2_t dy = (zone_coord2_t)a.y - (zone_coord2_t)b.y;
 
-        return sqrt((zone_coord2_t)dx * dx + (zone_coord2_t)dy * dy);
+        return sqrt(dx * dx + dy * dy);
     }
 
     zone_coord2_t cross(const ZoneInfo &o, const ZoneInfo &a, const ZoneInfo &b)
@@ -33,7 +33,10 @@ private:
         // (i.e z-component of their "2D" cross product, but remember that it is not defined in "2D").
         // Returns a positive value, if OAB makes a counter-clockwise turn,
         // negative for clockwise turn, and zero if the points are collinear.
-        return ((zone_coord2_t)a.x - o.x) * ((zone_coord2_t)b.y - o.y) - ((zone_coord2_t)a.y - o.y) * ((zone_coord2_t)b.x - o.x);
+        return ((zone_coord2_t)a.x - (zone_coord2_t)o.x) 
+            * ((zone_coord2_t)b.y - (zone_coord2_t)o.y) 
+            - ((zone_coord2_t)a.y - (zone_coord2_t)o.y) 
+            * ((zone_coord2_t)b.x - (zone_coord2_t)o.x);
     }
 
     std::tuple<std::vector<ZoneInfo>, std::vector<zone_idx_t>> find_convex_hull();
