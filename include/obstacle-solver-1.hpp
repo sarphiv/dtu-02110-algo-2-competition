@@ -32,7 +32,7 @@ public:
     (
         GraphBuilder& graph_bulider, 
         const std::vector<ZoneInfo>& zones_sorted, 
-        const std::vector<zone_idx_t>& zones_idx_inv, 
+        const std::vector<zone_idx_t>& zones_idx_inv,
         const std::vector<zone_coord_t>& x_sorted, 
         const std::vector<zone_coord_t>& y_sorted, 
         const std::vector<zone_idx_t>& x_idx, 

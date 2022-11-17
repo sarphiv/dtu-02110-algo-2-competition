@@ -43,7 +43,7 @@ void ObstacleSolver1::solve()
         y_sorted, 
         [&](const zone_idx_t &start, const zone_idx_t &end)
         { 
-            connect_range(y_sorted, y_idx, start, end); 
+            connect_range(y_sorted, y_idx, start, end);
         }
     );
 }
