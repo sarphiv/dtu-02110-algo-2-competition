@@ -2,6 +2,8 @@
 #include <unordered_set>
 #include <list>
 #include <tuple>
+#include <numeric>
+#include <cmath>
 
 
 #include "common.hpp"
@@ -13,13 +15,13 @@
 
 struct Line
 {
-    obstacle_solver_3_line_val_t slope;
-    obstacle_solver_3_line_val_t intercept;
-
+    const zone_coord_signed_t dx;
+    const zone_coord_signed_t dy;
+    const zone_idx_t rank;
 
     bool operator==(const Line& other) const
     {
-        return slope == other.slope && intercept == other.intercept;
+        return dx == other.dx && dy == other.dy && rank == other.rank;
     }
 };
 
@@ -32,10 +34,12 @@ namespace std
         {
             // DISCLAIMER: Based upon boost::hash_combine
 
-            std::hash<obstacle_solver_3_line_val_t> hasher;
+            std::hash<zone_coord_signed_t> hasher_coord;
+            std::hash<zone_idx_t> hasher_idx;
             size_t seed = OBSTACLE_SOLVER_3_LINE_SEED;
-            seed ^= (hasher(l.slope)     + 0x9e3779b9 + (seed << 6) + (seed >> 2));
-            seed ^= (hasher(l.intercept) + 0x9e3779b9 + (seed << 6) + (seed >> 2));
+            seed ^= (hasher_coord(l.dx) + 0x9e3779b9 + (seed << 6) + (seed >> 2));
+            seed ^= (hasher_coord(l.dy) + 0x9e3779b9 + (seed << 6) + (seed >> 2));
+            seed ^= (hasher_idx(l.rank) + 0x9e3779b9 + (seed << 6) + (seed >> 2));
 
             return seed;
         }
@@ -45,142 +49,126 @@ namespace std
 
 void ObstacleSolver3::solve()
 {
-    // Creae a map of lines to zones (pressence and order of zones)
+    // Create a set of zones that have had their outgoing edges calculated
     // NOTE: Stores RANK of zones, not index
-    std::unordered_map
-    <
-        Line, 
-        std::tuple
-        <
-            std::unordered_set<zone_idx_t>,
-            std::list<zone_idx_t>
-        >
-    > line_zone_map;
+    std::unordered_set<Line> processed;
 
 
     // Loop through all zones in order of x and y
-    for (zone_idx_t i = 0; i < zones_sorted.size(); i++)
+    for (zone_idx_t i = 0; i < zones_sorted.size(); ++i)
     {
+        // Map lines to their zone ranks
+        std::unordered_map<Line, std::list<zone_idx_t>> line_zones;
+
         // Cache first zone
         const auto& zone_i = zones_sorted[i];
 
 
         // Loop through all zones "in front"
-        for (zone_idx_t j = i+1; j < zones_sorted.size(); j++)
+        for (zone_idx_t j = i+1; j < zones_sorted.size(); ++j)
         {
             // Cache target zone
             const auto& zone_j = zones_sorted[j];
 
-
-            // Calculate slope and intercept
+            // Create line from slope components
             // NOTE: x_j > x_i or x_j == x_i -> y_j > y_i
             //  Last inequality is strict, because unique points.
-            // NOTE: Division by zero is intentional.
-            //  In this case it always maps to positive infinity.
-            const obstacle_solver_3_line_val_t slope = (obstacle_solver_3_line_val_t)
-                  (zone_j.y - zone_i.y) 
-                / (zone_j.x - zone_i.x);
+            zone_coord_signed_t dx = zone_j.x - zone_i.x;
+            zone_coord_signed_t dy = (zone_coord_signed_t)zone_j.y - (zone_coord_signed_t)zone_i.y;
 
-            const obstacle_solver_3_line_val_t intercept =
-                (slope != 1 / 0.0)
-                    ? (obstacle_solver_3_line_val_t)zone_i.y - slope * zone_i.x
-                    : zone_i.x;
-
-
-            // Create line
-            const Line line{slope, intercept};
-
-            // If line already exists, add zone if not already added
-            auto it = line_zone_map.find(line);
-            if (it != line_zone_map.end())
-            {
-                auto& [set, list] = it->second;
-
-                if (!set.count(j))
-                {
-                    set.insert(j);
-                    list.push_back(j);
-                }
-            }
-            // Else, create line, and add the two zones
+            if (dx == 0)
+                dy = 1;
+            else if (dy == 0)
+                dx = 1;
             else
             {
-                auto& [set, list] = line_zone_map[line];
-                set.insert(i);
-                set.insert(j);
-                list.push_back(i);
-                list.push_back(j);
+                zone_coord_t d = std::gcd(dx, abs(dy));
+                dx /= d;
+                dy /= d;
             }
-        }
-    }
+
+            Line line{dx, dy, j};
 
 
-    // Loop over all lines
-    for (const auto& line_pair : line_zone_map)
-    {
-        // Get zones on line
-        // NOTE: Leftmost zone is always first zone, they are ordered
-        const auto& pair = std::get<1>(line_pair);
-        const auto& line_zones = std::get<1>(pair);
-
-        
-        // If line does not have enough zones, skip
-        if (line_zones.size() < 4)
-            continue;
-
-
-        // Loop over all zones in the line
-        //  while keeping track of the i'th zone on the line.
-        long long line_zones_i = 0;
-        for (const auto &zone_rank : line_zones)
-        {
-            // Cache zone
-            const auto& zone_i = zones_sorted[zone_rank];
-            const auto& zone_i_idx = zones_idx[zone_rank];
-            const auto& capacity = zone_i.capacity[O3];
-
-            // If zone does not support obstacle 3, skip
-            if (capacity == 0)
+            // If line has been processed, skip it
+            if (processed.count(line))
                 continue;
 
 
-            // Add edges for all zones in front of (i-2)'th zone
-            zone_idx_t j = 0;
-            auto it = line_zones.begin();
-            while (j < line_zones_i - 2)
+            // Add line and zone_j to processed and processing queue
+            // NOTE: Technically not processed until after this loop
+            processed.insert(line);
+            line_zones[{line.dx, line.dy, i}].push_back(j);
+        }
+
+
+        // Process all found lines going through zone_i
+        for (auto& [line, zones] : line_zones)
+        {
+            // Put first zone in front of all zones
+            // NOTE: Leftmost zone is always first zone, they are ordered.
+            //  The "origin" zone_i was never added above
+            zones.push_front(i);
+            processed.insert({line.dx, line.dy, i});
+
+            // If line does not have enough zones, skip
+            if (zones.size() < 4)
+                continue;
+
+
+            // Loop over all zones in the line
+            //  while keeping track of the i'th zone on the line.
+            long long line_zones_i = 0;
+            for (const auto &zone_rank : zones)
             {
-                graph_builder.add_edge
-                (
-                    zone_i_idx,
-                    zones_idx[*it],
-                    O3,
-                    capacity
-                );
+                // Cache zone
+                const auto& zone_i = zones_sorted[zone_rank];
+                const auto& zone_i_idx = zones_idx[zone_rank];
+                const auto& capacity = zone_i.capacity[O3];
 
-                ++it;
-                ++j;
+                // If zone does not support obstacle 3, skip
+                if (capacity == 0)
+                    continue;
+
+
+                // Add edges for all zones in front of (i-2)'th zone
+                zone_idx_t j = 0;
+                auto it = zones.begin();
+                while (j < line_zones_i - 2)
+                {
+                    graph_builder.add_edge
+                    (
+                        zone_i_idx,
+                        zones_idx[*it],
+                        O3,
+                        capacity
+                    );
+
+                    ++it;
+                    ++j;
+                }
+
+                // Add edges for all zones behind (i+2)'th zone
+                j = zones.size() - 1;
+                auto rit = zones.rbegin();
+                while (j > line_zones_i + 2)
+                {
+                    graph_builder.add_edge
+                    (
+                        zone_i_idx,
+                        zones_idx[*rit],
+                        O3,
+                        capacity
+                    );
+
+                    ++rit;
+                    --j;
+                }
+
+
+                // Increment index for i'th zone on line
+                ++line_zones_i;
             }
-
-            // Add edges for all zones behind (i+2)'th zone
-            j = line_zones.size() - 1;
-            auto rit = line_zones.rbegin();
-            while (j > line_zones_i + 2)
-            {
-                graph_builder.add_edge
-                (
-                    zone_i_idx,
-                    zones_idx[*rit],
-                    O3,
-                    capacity
-                );
-
-                ++rit;
-                --j;
-            }
-
-
-            // Increment index for i'th zone on line
-            ++line_zones_i;
         }
     }
 }
