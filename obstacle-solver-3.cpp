@@ -129,7 +129,10 @@ void ObstacleSolver3::solve()
 
                 // If zone does not support obstacle 3, skip
                 if (capacity == 0)
+                {
+                    ++line_zones_i;
                     continue;
+                }
 
 
                 // Add edges for all zones in front of (i-2)'th zone
