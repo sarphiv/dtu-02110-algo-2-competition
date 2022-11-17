@@ -6,24 +6,6 @@
 #include <cmath>
 
 
-
-
-
-
-
-
-
-#include <iostream>
-
-
-
-
-
-
-
-
-
-
 #include "common.hpp"
 #include "obstacle-solver-3.hpp"
 
@@ -64,77 +46,6 @@ namespace std
     };
 }
 
-
-void ObstacleSolver3::solve_naive()
-{
-    // Naive solution
-    for (zone_idx_t i = 0; i < zones_sorted.size(); ++i)
-    {
-        const auto& a = zones_sorted[i];
-
-        for (zone_idx_t j = 0; j < zones_sorted.size(); ++j)
-        {
-            if (i == j)
-                continue;
-
-            const auto& c = zones_sorted[j];
-            unsigned int zones_between = 0;
-
-            for (zone_idx_t k = 0; k < zones_sorted.size(); ++k)
-            {
-                if (i == k || j == k)
-                    continue;
-
-
-                const auto& b = zones_sorted[k];
-
-
-                const zone_coord2_t dx1 = b.x - (zone_coord2_t)a.x;
-                const zone_coord2_t dy1 = b.y - (zone_coord2_t)a.y;
-                
-                const zone_coord2_t dx2 = c.x - (zone_coord2_t)a.x;
-                const zone_coord2_t dy2 = c.y - (zone_coord2_t)a.y;
-                
-                // If b not between a and c
-                if ((dx1 > 0 && dx2 <= 0) || (dx1 < 0 && dx2 >= 0) || (dx1 == 0 && dx2 != 0))
-                    continue;
-                if ((dy1 > 0 && dy2 <= 0) || (dy1 < 0 && dy2 >= 0) || (dy1 == 0 && dy2 != 0))
-                    continue;
-                if (dx1*dx1 + dy1*dy1 > dx2*dx2 + dy2*dy2)
-                    continue;
-
-                // If on a line (dot product of vector1 and rotated vector2)
-                if (dx1*(-dy2) + dy1*dx2 != 0)
-                    continue;
-
-                ++zones_between;
-
-                if (zones_between > 1)
-                {
-                    graph_builder.add_edge
-                    (
-                        zones_idx[i],
-                        zones_idx[j],
-                        O3,
-                        a.capacity[O3]
-                    );
-
-                    // Print edge added
-                    std::cout << zones_idx[i] << " " << zones_idx[j] << " " << a.capacity[O3] << std::endl;
-                }
-            }
-        }
-    }
-    // triple loop
-    // delta vectors from first->second and second->third
-    // if dist(first->second) < dist(first-third)
-    //  and same sign original non-rotated delta vectors
-    // rotate one vector by 90
-    // dot product, check if zero
-    // if zero, it is on a line
-    // add to counter
-    // if counter == 2, connect first and third with edge
-}
 
 
 void ObstacleSolver3::solve()
@@ -234,11 +145,6 @@ void ObstacleSolver3::solve()
                         capacity
                     );
 
-
-                    // std::cout << zone_i_idx << " " << zones_idx[*it] << " " << capacity << std::endl;
-
-
-
                     ++it;
                     ++j;
                 }
@@ -255,10 +161,6 @@ void ObstacleSolver3::solve()
                         O3,
                         capacity
                     );
-
-                    // std::cout << zone_i_idx << " " << zones_idx[*rit] << " " << capacity << std::endl;
-
-
 
                     ++rit;
                     --j;

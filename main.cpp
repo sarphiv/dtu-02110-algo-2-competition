@@ -2,22 +2,6 @@
 #include <vector>
 #include <tuple>
 
-
-
-
-
-
-
-
-#include <string>
-
-
-
-
-
-
-
-
 #include "common.hpp"
 #include "common-templates.hpp"
 #include "obstacle-solver-1.hpp"
@@ -95,61 +79,24 @@ int main(int argc, char *argv[])
     ObstacleSolver4 solver_4(graph_builder, zones, zones_idx);
     solver_4.solve();
 
-    // std::cout << "4 ";
     ObstacleSolver1 solver_1(graph_builder, zones, zones_idx_inv, x, y, x_idx, y_idx);
     solver_1.solve();
 
-    // std::cout << "1 ";
     ObstacleSolver2 solver_2(graph_builder, zones, zones_idx);
     solver_2.solve();
 
-    // std::cout << "2 ";
     ObstacleSolver3 solver_3(graph_builder, zones, zones_idx);
-    std::flush(std::cout);
-    if (argc > 1 && std::string(argv[1]) == "naive")
-    {
-        std::cout << "naive ";
-        solver_3.solve_naive();
-    }
-    else
-    {
-        std::cout << "standard ";
-        solver_3.solve();
-    }
+    solver_3.solve();
 
-    // std::cout << "3 ";
-    // std::flush(std::cout);
+
     // Construct regular graph edges
     auto flow_edges = graph_builder.build();
-    // std::cout << "edge " << std::endl;
+
     // Construct flow graph
     FlowGraph graph(0, graph_builder.get_zone_input(zones.size()-1), flow_edges);
 
     // Find max flow and print
-
-
-
-
-
-
-
-
-
-
     std::cout << graph.maximize_flow() << std::endl;
-    graph.maximize_flow();
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     // Return success

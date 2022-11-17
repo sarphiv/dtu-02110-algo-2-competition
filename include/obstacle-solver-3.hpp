@@ -12,8 +12,8 @@ class ObstacleSolver3
 {
 private:
     GraphBuilder& graph_builder;
-    const std::vector<ZoneInfo>& zones_sorted;
 
+    const std::vector<ZoneInfo>& zones_sorted;
     const std::vector<zone_idx_t>& zones_idx;
 
 
@@ -30,6 +30,5 @@ public:
     {
     }
 
-    void solve_naive();
     void solve();
 };
