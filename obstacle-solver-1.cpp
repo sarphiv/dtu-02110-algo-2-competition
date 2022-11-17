@@ -11,7 +11,7 @@ void ObstacleSolver1::connect_range(const std::vector<zone_coord_t>& val, const 
     {
         // Get zone ID and capacity
         auto id = idx[i];
-        auto capacity = zones[id].capacity[O1];
+        auto capacity = zones_sorted[zones_idx_inv[id]].capacity[O1];
 
         // If zone has capacity, connect it everything else
         if (capacity > 0)

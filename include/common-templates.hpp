@@ -124,7 +124,7 @@ void find_sequences
             if (start != end)
                 process_sequence(start, end);
 
-            start = end;
+            start = i;
             prev_val = val[i];
         }
 

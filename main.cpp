@@ -52,17 +52,19 @@ int main()
 
     // Sort y, and then sort x by x then y
     auto [y_idx, y_idx_inv] = argsort<zone_coord_t, zone_idx_t>(y, true);
-    auto x_idx = argsort<zone_coord_t, zone_idx_t>
+    auto [x_idx, x_idx_inv] = argsort<zone_coord_t, zone_idx_t>
     (
         x,
         [&](const zone_idx_t &a, const zone_idx_t &b)
         {
             return x[a] < x[b] || (x[a] == x[b] && y_idx_inv[a] < y_idx_inv[b]);
-        }
+        },
+        true
     );
 
     // Make zones inherit order of x
     const auto& zones_idx = x_idx;
+    const auto& zones_idx_inv = x_idx_inv;
     {
         std::vector<ZoneInfo> zones_sorted(zones.size());
         for (zone_idx_t i = 0; i < zones_idx.size(); ++i)
@@ -74,10 +76,10 @@ int main()
     // Build graph via solvers
     GraphBuilder graph_builder(zones, zones_idx);
 
-    ObstacleSolver4 solver_4(graph_builder, zones);
+    ObstacleSolver4 solver_4(graph_builder, zones, zones_idx_inv);
     solver_4.solve();
 
-    ObstacleSolver1 solver_1(graph_builder, zones, x, y, x_idx, y_idx);
+    ObstacleSolver1 solver_1(graph_builder, zones, zones_idx_inv, x, y, x_idx, y_idx);
     solver_1.solve();
 
     ObstacleSolver2 solver_2(graph_builder, zones, zones_idx);

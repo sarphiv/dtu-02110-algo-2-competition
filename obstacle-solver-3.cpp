@@ -81,8 +81,10 @@ void ObstacleSolver3::solve()
                   (zone_j.y - zone_i.y) 
                 / (zone_j.x - zone_i.x);
 
-            const obstacle_solver_3_line_val_t intercept = (obstacle_solver_3_line_val_t)
-                zone_i.y - slope * zone_i.x;
+            const obstacle_solver_3_line_val_t intercept =
+                (slope != 1 / 0.0)
+                    ? (obstacle_solver_3_line_val_t)zone_i.y - slope * zone_i.x
+                    : zone_i.x;
 
 
             // Create line

@@ -2,7 +2,9 @@
 
 
 using zone_coord_t = unsigned int;
+using zone_coord_signed_t = int;
 using zone_coord2_t = unsigned long long;
+using zone_coord_dist_t = float;
 using zone_idx_t = unsigned int;
 using zone_capacity_t = unsigned int;
 

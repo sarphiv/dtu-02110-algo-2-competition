@@ -40,11 +40,11 @@ std::tuple<std::vector<ZoneInfo>, std::vector<zone_idx_t>> ObstacleSolver2::find
 	}
 
 
-    // Note: the last zone in the vector is the same as the first one.
 	hull.resize(k-1);
     hull_idx.resize(k-1);
 
     // Returns a vector of points on the convex hull in counter-clockwise order.
+    // Note: There is a duplicate zone
 	return {hull, hull_idx};
 }
 
@@ -70,11 +70,11 @@ void ObstacleSolver2::solve()
 
         // Search for furthest point, which intuitively is on the convex hull
         zone_idx_t furthest_idx = 0;
-        zone_coord2_t furthest_dist = 0;
+        zone_coord_dist_t furthest_dist = 0;
 
         for (zone_idx_t j = 0; j < hull.size(); j++)
         {
-            auto d = dist(zone, hull[j]);
+            zone_coord_dist_t d = dist(zone, hull[j]);
 
             // If distance is greater than furthest distance, update
             // NOTE: In case of same distance, the lowest index zone is chosen

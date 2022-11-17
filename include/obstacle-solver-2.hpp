@@ -16,9 +16,11 @@ private:
     const std::vector<zone_idx_t>& zones_idx;
 
 
-    zone_coord2_t dist(const ZoneInfo &a, const ZoneInfo &b)
+    zone_coord_dist_t dist(const ZoneInfo &a, const ZoneInfo &b)
     {
-        return std::sqrt(std::pow(a.x - b.x, 2) + std::pow(a.y - b.y, 2));
+        return sqrtf(
+            powf((zone_coord_signed_t)a.x - (zone_coord_signed_t)b.x, 2) 
+            + powf((zone_coord_signed_t)a.y - (zone_coord_signed_t)b.y, 2));
     }
 
     zone_coord2_t cross(const ZoneInfo &o, const ZoneInfo &a, const ZoneInfo &b)
