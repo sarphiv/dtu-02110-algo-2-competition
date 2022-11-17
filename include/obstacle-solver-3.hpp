@@ -30,5 +30,6 @@ public:
     {
     }
 
+    void solve_naive();
     void solve();
 };
