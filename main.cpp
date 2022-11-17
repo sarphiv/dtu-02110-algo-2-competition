@@ -52,19 +52,17 @@ int main()
 
     // Sort y, and then sort x by x then y
     auto [y_idx, y_idx_inv] = argsort<zone_coord_t, zone_idx_t>(y, true);
-    auto [x_idx, x_idx_inv] = argsort<zone_coord_t, zone_idx_t>
+    auto x_idx = argsort<zone_coord_t, zone_idx_t>
     (
         x,
         [&](const zone_idx_t &a, const zone_idx_t &b)
         {
             return x[a] < x[b] || (x[a] == x[b] && y_idx_inv[a] < y_idx_inv[b]);
-        },
-        true
+        }
     );
 
     // Make zones inherit order of x
     const auto& zones_idx = x_idx;
-    const auto& zones_idx_inv = x_idx_inv;
     {
         std::vector<ZoneInfo> zones_sorted(zones.size());
         for (zone_idx_t i = 0; i < zones_idx.size(); ++i)
@@ -93,7 +91,7 @@ int main()
     auto flow_edges = graph_builder.build();
 
     // Construct flow graph
-    FlowGraph graph(0, zones.size(), flow_edges);
+    FlowGraph graph(0, graph_builder.get_zone_input(zones.size()-1), flow_edges);
 
     // Find max flow and print
     std::cout << graph.maximize_flow() << std::endl;

@@ -11,7 +11,7 @@ void ObstacleSolver4::solve()
             graph_builder.add_edge
             (
                 i,
-                zone_count,
+                zone_count-1,
                 O4,
                 zones[i].capacity[O4]
             );

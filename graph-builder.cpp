@@ -1,6 +1,23 @@
 #include <graph-builder.hpp>
 
 
+
+
+
+
+
+
+#include <iostream>
+
+
+
+
+
+
+
+
+
+
 std::list<FlowEdge> GraphBuilder::build()
 {
     // Store the edges of a flow graph
@@ -23,8 +40,8 @@ std::list<FlowEdge> GraphBuilder::build()
     for (const auto &edge : edges)
         flow_edges.push_back
         ({
-            get_zone_input(edge.start),
-            get_zone_output(edge.end, edge.obstacle),
+            get_zone_output(edge.start, edge.obstacle),
+            get_zone_input(edge.end),
             edge.capacity
         });
 

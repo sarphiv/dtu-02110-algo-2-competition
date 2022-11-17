@@ -1,7 +1,7 @@
-CC = gcc
-CPPFLAGS = -Iinclude
-CFLAGS = -Wall -O3
-LDFLAGS = -L.
+CC = gcc -g
+CXXFLAGS = -g -Wall -Iinclude
+CFLAGS = -g -Wall
+LDFLAGS = -L. -g
 LDLIBS = 
 
 .PHONY: clean

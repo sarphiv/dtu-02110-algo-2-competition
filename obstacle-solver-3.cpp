@@ -3,6 +3,7 @@
 #include <list>
 #include <tuple>
 
+
 #include "common.hpp"
 #include "obstacle-solver-3.hpp"
 
@@ -113,7 +114,7 @@ void ObstacleSolver3::solve()
 
 
     // Loop over all lines
-    for (auto& line_pair : line_zone_map)
+    for (const auto& line_pair : line_zone_map)
     {
         // Get zones on line
         // NOTE: Leftmost zone is always first zone, they are ordered
@@ -128,7 +129,7 @@ void ObstacleSolver3::solve()
 
         // Loop over all zones in the line
         //  while keeping track of the i'th zone on the line.
-        zone_idx_t line_zones_i = 0;
+        long long line_zones_i = 0;
         for (const auto &zone_rank : line_zones)
         {
             // Cache zone

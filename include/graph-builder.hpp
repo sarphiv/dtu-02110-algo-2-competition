@@ -14,17 +14,6 @@ private:
     const std::vector<zone_idx_t>& zones_idx;
 
 
-    zone_idx_t get_zone_input(zone_idx_t zone_idx)
-    {
-        return zone_idx * (ZONE_OBSTACLE_SIZE + 1);
-    }
-
-    zone_idx_t get_zone_output(zone_idx_t zone_idx, zone_obstacle_val_t obstacle)
-    {
-        return zone_idx * (ZONE_OBSTACLE_SIZE + 1) + 1 + obstacle;
-    }
-
-
 public:
     std::list<ZoneEdge> edges;
 
@@ -33,6 +22,17 @@ public:
     GraphBuilder(const std::vector<ZoneInfo>& zones_sorted, const std::vector<zone_idx_t>& zones_idx)
         : zones_sorted(zones_sorted), zones_idx(zones_idx)
     {
+    }
+
+
+    zone_idx_t get_zone_input(zone_idx_t zone_idx)
+    {
+        return zone_idx * (ZONE_OBSTACLE_SIZE + 1);
+    }
+
+    zone_idx_t get_zone_output(zone_idx_t zone_idx, zone_obstacle_val_t obstacle)
+    {
+        return zone_idx * (ZONE_OBSTACLE_SIZE + 1) + 1 + obstacle;
     }
 
 

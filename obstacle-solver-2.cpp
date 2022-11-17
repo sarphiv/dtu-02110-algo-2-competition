@@ -79,7 +79,7 @@ void ObstacleSolver2::solve()
             // If distance is greater than furthest distance, update
             // NOTE: In case of same distance, the lowest index zone is chosen
             if (   d > furthest_dist 
-                || d == furthest_dist && hull_idx[j] < furthest_idx)
+                || (d == furthest_dist && hull_idx[j] < furthest_idx))
             {
                 furthest_idx = hull_idx[j];
                 furthest_dist = d;
