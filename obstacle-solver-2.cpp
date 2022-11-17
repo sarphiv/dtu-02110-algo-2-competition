@@ -69,7 +69,7 @@ void ObstacleSolver2::solve()
 
 
         // Search for furthest point, which intuitively is on the convex hull
-        zone_idx_t furthest_idx = 0;
+        zone_idx_t furthest_idx = zone_idx;
         zone_coord_dist_t furthest_dist = 0;
 
         for (zone_idx_t j = 0; j < hull.size(); j++)
@@ -88,11 +88,13 @@ void ObstacleSolver2::solve()
 
 
         // Add edge to furthest zone to graph
-        graph_builder.add_edge(
-            zone_idx,
-            furthest_idx, 
-            O2, 
-            zone.capacity[O2]
-        );
+        if (furthest_idx != zone_idx)
+            graph_builder.add_edge
+            (
+                zone_idx,
+                furthest_idx, 
+                O2, 
+                zone.capacity[O2]
+            );
     }
 }

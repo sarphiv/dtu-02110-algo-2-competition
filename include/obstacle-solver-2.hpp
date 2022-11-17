@@ -19,8 +19,8 @@ private:
     zone_coord_dist_t dist(const ZoneInfo &a, const ZoneInfo &b)
     {
         return sqrtf(
-            powf((zone_coord_signed_t)a.x - (zone_coord_signed_t)b.x, 2) 
-            + powf((zone_coord_signed_t)a.y - (zone_coord_signed_t)b.y, 2));
+            powf((zone_coord_signed_t)(a.x) - (zone_coord_signed_t)(b.x), 2.0f) 
+            + powf((zone_coord_signed_t)(a.y) - (zone_coord_signed_t)(b.y), 2.0f));
     }
 
     zone_coord2_t cross(const ZoneInfo &o, const ZoneInfo &a, const ZoneInfo &b)
