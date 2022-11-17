@@ -94,6 +94,7 @@ int main(int argc, char *argv[])
 
     // Construct flow graph
     FlowGraph graph(0, graph_builder.get_zone_input(zones.size()-1), flow_edges);
+    
 
     // Find max flow and print
     std::cout << graph.maximize_flow() << std::endl;
