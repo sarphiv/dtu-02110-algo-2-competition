@@ -76,7 +76,7 @@ int main()
     // Build graph via solvers
     GraphBuilder graph_builder(zones, zones_idx);
 
-    ObstacleSolver4 solver_4(graph_builder, zones, zones_idx_inv);
+    ObstacleSolver4 solver_4(graph_builder, zones, zones_idx);
     solver_4.solve();
 
     ObstacleSolver1 solver_1(graph_builder, zones, zones_idx_inv, x, y, x_idx, y_idx);
