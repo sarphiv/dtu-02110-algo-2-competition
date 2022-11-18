@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 #include <list>
 #include <unordered_map>
 
@@ -27,6 +28,11 @@ struct FlowEdge
     node_idx_t start;
     node_idx_t end;
     capacity_t capacity;
+
+    FlowEdge()
+        : start(0), end(0), capacity(0)
+    {
+    }
 
     FlowEdge(node_idx_t start, node_idx_t end, capacity_t capacity)
         : start(start), end(end), capacity(capacity)

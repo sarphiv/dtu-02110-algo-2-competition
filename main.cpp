@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <tuple>
+#include <fstream>
 
 
 #include "common.hpp"
@@ -14,11 +15,11 @@
 
 
 std::tuple<std::vector<ZoneInfo>, std::vector<zone_coord_t>, std::vector<zone_coord_t>> 
-load_zones()
+load_zones(std::istream& stream)
 {
     // Load zone amount
     node_idx_t n;
-    std::cin >> n;
+    stream >> n;
 
     // Load zones and separate coordinates
     std::vector<ZoneInfo> zones(n);
@@ -29,7 +30,7 @@ load_zones()
     {
         ZoneInfo zone;
         
-        std::cin 
+        stream 
             >> zone.x >> zone.y 
             >> zone.capacity[0] >> zone.capacity[1] 
             >> zone.capacity[2] >> zone.capacity[3];
@@ -48,7 +49,10 @@ load_zones()
 int main(int argc, char *argv[])
 {
     // Load zones and separate out coordinates
-    auto [zones, x, y] = load_zones();
+    std::ifstream fstream;
+    if (argc > 1) fstream.open(argv[1]);
+    auto [zones, x, y] = load_zones(argc > 1 ? fstream : std::cin);
+    if (argc > 1) fstream.close();
 
 
     // Sort y, and then sort x by x then y

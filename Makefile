@@ -3,6 +3,11 @@ CXXFLAGS = -g -Wall -O3 -Iinclude
 CFLAGS = -g -Wall
 LDFLAGS = -L. -g
 LDLIBS = 
+# CC = gcc
+# CXXFLAGS = -Wall -O3 -Iinclude
+# CFLAGS = -Wall
+# LDFLAGS = -L.
+# LDLIBS = 
 
 .PHONY: clean
 

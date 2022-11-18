@@ -1,10 +1,13 @@
+#include <list>
+
 #include <graph-builder.hpp>
+
 
 
 std::list<FlowEdge> GraphBuilder::build()
 {
     // Store the edges of a flow graph
-    std::list<FlowEdge> flow_edges;
+    std::list<FlowEdge> flow_edges(edges.size());
 
 
     // All internal edges for each zone
@@ -27,6 +30,7 @@ std::list<FlowEdge> GraphBuilder::build()
             get_zone_input(edge.end),
             edge.capacity
         });
+
 
 
     // Return flow edges

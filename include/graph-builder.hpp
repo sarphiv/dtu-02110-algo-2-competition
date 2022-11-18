@@ -1,6 +1,6 @@
 #pragma once
-#include <list>
 #include <vector>
+#include <list>
 
 #include "common.hpp"
 #include "flow-graph.hpp"
@@ -23,7 +23,6 @@ public:
         : zones_sorted(zones_sorted), zones_idx(zones_idx)
     {
     }
-
 
     zone_idx_t get_zone_input(zone_idx_t zone_idx)
     {

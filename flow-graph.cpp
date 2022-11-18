@@ -1,3 +1,7 @@
+#include <list>
+#include <vector>
+
+
 #include "flow-graph.hpp"
 
 
@@ -87,7 +91,7 @@ node_map_t FlowGraph::find_predecessors(const node_idx_t& start, const node_idx_
     predecessor[start] = start;
 
     // Breadth first search
-    while (!stack.empty())
+    while (!queue.empty())
     {
         node_idx_t const parent = queue.front();
         queue.pop();
