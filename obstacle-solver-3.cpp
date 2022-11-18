@@ -8,56 +8,12 @@
 #include "obstacle-solver-3.hpp"
 
 
-// #define OBSTACLE_SOLVER_3_SLOPE_SEED 34127
-
-
-// struct Slope
-// {
-//     zone_coord_signed_t dx;
-//     zone_coord_signed_t dy;
-
-//     Slope()
-//         : dx(0), dy(0)
-//     {
-//     }
-//     Slope(zone_coord_signed_t dx, zone_coord_signed_t dy)
-//         : dx(dx), dy(dy)
-//     {
-//     }
-
-//     bool operator==(const Slope& other) const
-//     {
-//         return dx == other.dx && dy == other.dy;
-//     }
-// };
-
-// namespace std 
-// {
-//     template <>
-//     struct hash<Slope>
-//     {
-//         std::size_t operator()(const Slope& s) const
-//         {
-//             // DISCLAIMER: Based upon boost::hash_combine
-
-//             size_t seed = OBSTACLE_SOLVER_3_SLOPE_SEED;
-//             seed ^= (s.dx + 0x9e3779b9 + (seed << 6) + (seed >> 2));
-//             seed ^= (s.dy + 0x9e3779b9 + (seed << 6) + (seed >> 2));
-
-//             return seed;
-//             // return ((s.dx + 0x9e3779b9) + (seed << 6)) ^ (s.dy + (seed >> 2));
-//         }
-//     };
-// }
-
-
 
 void ObstacleSolver3::solve()
 {
     // Counter for zones on the same line (all lines go through zone_i)
     // NOTE: Defined out here to avoid reallocating memory
-    // std::unordered_map<Slope, zone_idx_t> slope_counter;
-    tsl::robin_map<long long, zone_idx_t> slope_counter(zones_sorted.size());
+    tsl::robin_map<double, zone_idx_t> slope_counter;
 
 
     // Loop through all zones sorted by x and y
@@ -78,27 +34,14 @@ void ObstacleSolver3::solve()
             // Cache second zone
             const auto& zone_j = zones_sorted[j];
 
-            // Calculate slope
-            zone_coord_signed_t dx = zone_j.x - zone_i.x;
-            zone_coord_signed_t dy = (zone_coord_signed_t)zone_j.y - (zone_coord_signed_t)zone_i.y;
-
-            if (dx == 0)
-                dy = 1;
-            else if (dy == 0)
-                dx = 1;
-            else
-            {
-                zone_coord_signed_t d = std::gcd(dx, abs(dy));
-                dx /= d;
-                dy /= d;
-            }
-            
-
             // Increment slope zone counter
             // NOTE: dx is never negative. This hash is unique.
             //  May be able to mathematically reduce because of gcd.
-            const auto& count = ++slope_counter
-            [(long long)dx+(long long)dy * (ZONE_COORD_MAX+1)];
+            // const long long hash = (long long)dx + (long long)dy * (ZONE_COORD_MAX + 1);
+            const double slope = 
+                (double)((zone_coord_signed_t)zone_j.y - (zone_coord_signed_t)zone_i.y) 
+                / (double)(zone_j.x - zone_i.x);
+            const auto& count = ++slope_counter[slope];
 
 
             // If more than two zones are in front of zone_i on the same line, add edges.
