@@ -1,22 +1,29 @@
-#include <unordered_map>
-#include <unordered_set>
+#include <robin_map.h>
 #include <list>
 #include <tuple>
 #include <numeric>
-#include <cmath>
 
 
 #include "common.hpp"
 #include "obstacle-solver-3.hpp"
 
 
-#define OBSTACLE_SOLVER_3_LINE_SEED 34127
+#define OBSTACLE_SOLVER_3_SLOPE_SEED 34127
 
 
 struct Slope
 {
-    const zone_coord_signed_t dx;
-    const zone_coord_signed_t dy;
+    zone_coord_signed_t dx;
+    zone_coord_signed_t dy;
+
+    Slope()
+        : dx(0), dy(0)
+    {
+    }
+    Slope(zone_coord_signed_t dx, zone_coord_signed_t dy)
+        : dx(dx), dy(dy)
+    {
+    }
 
     bool operator==(const Slope& other) const
     {
@@ -34,7 +41,7 @@ namespace std
             // DISCLAIMER: Based upon boost::hash_combine
 
             std::hash<zone_coord_signed_t> hasher;
-            size_t seed = OBSTACLE_SOLVER_3_LINE_SEED;
+            size_t seed = OBSTACLE_SOLVER_3_SLOPE_SEED;
             seed ^= (hasher(s.dx) + 0x9e3779b9 + (seed << 6) + (seed >> 2));
             seed ^= (hasher(s.dy) + 0x9e3779b9 + (seed << 6) + (seed >> 2));
 
@@ -47,6 +54,12 @@ namespace std
 
 void ObstacleSolver3::solve()
 {
+    // Counter for zones on the same line (all lines go through zone_i)
+    // NOTE: Defined out here to avoid reallocating memory
+    // std::unordered_map<Slope, zone_idx_t> slope_counter;
+    tsl::robin_map<Slope, zone_idx_t> slope_counter;
+
+
     // Loop through all zones sorted by x and y
     for (zone_idx_t i = 0; i < zones_sorted.size(); ++i)
     {
@@ -54,8 +67,8 @@ void ObstacleSolver3::solve()
         const auto& zone_i = zones_sorted[i];
         const auto& zone_i_idx = zones_idx[i];
 
-        // Counter for zones on the same line (all lines go through zone_i)
-        std::unordered_map<Slope, zone_idx_t> slope_counter;
+        // Clear slope counter to count for current zone_i only
+        slope_counter.clear();
 
 
         // Loop through all zones "in front"
@@ -85,11 +98,11 @@ void ObstacleSolver3::solve()
             Slope slope{dx, dy};
 
             // Increment slope zone counter
-            slope_counter[slope]++;
+            auto& count = ++slope_counter[slope];
 
 
             // If more than two zones are in front of zone_i on the same line, add edges.
-            if (slope_counter[slope] > 2)
+            if (count > 2)
             {
                 // If capacity available, add edge from zone_i to zone_j
                 if (zone_i.capacity[O3] > 0)

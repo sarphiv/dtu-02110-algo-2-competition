@@ -1,5 +1,5 @@
 CC = gcc -g
-CXXFLAGS = -g -Wall -Iinclude
+CXXFLAGS = -g -Wall -O3 -Iinclude
 CFLAGS = -g -Wall
 LDFLAGS = -L. -g
 LDLIBS = 
