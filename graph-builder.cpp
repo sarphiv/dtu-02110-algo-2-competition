@@ -11,15 +11,15 @@ std::list<FlowEdge> GraphBuilder::build()
 
 
     // All internal edges for each zone
-    for (zone_idx_t i = 0; i < zones_sorted.size(); ++i)
+    for (zone_idx_t i = 0; i < zones.size(); ++i)
         for (zone_obstacle_val_t j = 0; j < ZONE_OBSTACLE_SIZE; ++j)
-            if (zones_sorted[i].capacity[j] > 0)
+            if (zones[i].capacity[j] > 0)
                 flow_edges.push_back
                 ({
                     // NOTE: Adding 1 because an input node also needs to be added for each zone.
-                    get_zone_input(zones_idx[i]),
-                    get_zone_output(zones_idx[i], j),
-                    zones_sorted[i].capacity[j]
+                    get_zone_input(zones[i].idx),
+                    get_zone_output(zones[i].idx, j),
+                    zones[i].capacity[j]
                 });
 
     // Add edges between zones

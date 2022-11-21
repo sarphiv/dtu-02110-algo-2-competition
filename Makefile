@@ -1,8 +1,8 @@
 CC = gcc -g
 CXXFLAGS = -g -Wall -O3 -Iinclude
 CFLAGS = -g -Wall
-LDFLAGS = -L. -g
-LDLIBS = 
+LDFLAGS = -g -L.
+LDLIBS =
 # CC = gcc
 # CXXFLAGS = -Wall -O3 -Iinclude
 # CFLAGS = -Wall

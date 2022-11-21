@@ -14,7 +14,7 @@
 #include "flow-graph.hpp"
 
 
-std::tuple<std::vector<ZoneInfo>, std::vector<zone_coord_t>, std::vector<zone_coord_t>> 
+std::vector<ZoneInfo>
 load_zones(std::istream& stream)
 {
     // Load zone amount
@@ -23,26 +23,24 @@ load_zones(std::istream& stream)
 
     // Load zones and separate coordinates
     std::vector<ZoneInfo> zones(n);
-    std::vector<zone_coord_t> x(n);
-    std::vector<zone_coord_t> y(n);
 
     for (zone_idx_t i = 0; i < n; ++i)
     {
         ZoneInfo zone;
-        
+
         stream 
             >> zone.x >> zone.y 
             >> zone.capacity[0] >> zone.capacity[1] 
             >> zone.capacity[2] >> zone.capacity[3];
+        zone.idx = i;
+
 
         zones[i] = zone;
-        x[i] = zone.x;
-        y[i] = zone.y;
     }
 
 
     // Return vector of zones
-    return {zones, x, y};
+    return zones;
 }
 
 
@@ -51,57 +49,52 @@ int main(int argc, char *argv[])
     // Load zones and separate out coordinates
     std::ifstream fstream;
     if (argc > 1) fstream.open(argv[1]);
-    auto [zones, x, y] = load_zones(argc > 1 ? fstream : std::cin);
+    auto zones = load_zones(argc > 1 ? fstream : std::cin);
     if (argc > 1) fstream.close();
 
 
-    // Sort y, and then sort x by x then y
-    auto [y_idx, y_idx_inv] = argsort<zone_coord_t, zone_idx_t>(y, true);
-    auto [x_idx, x_idx_inv] = argsort<zone_coord_t, zone_idx_t>
+    // Sort zones by x then y
+    argsort<ZoneInfo, zone_idx_t>
     (
-        x,
+        zones,
         [&](const zone_idx_t &a, const zone_idx_t &b)
         {
-            return x[a] < x[b] || (x[a] == x[b] && y_idx_inv[a] < y_idx_inv[b]);
-        },
-        true
+            return (zones[a].x < zones[b].x) | ((zones[a].x == zones[b].x) & (zones[a].y < zones[b].y));
+        }
     );
-
-    // Make zones inherit order of x
-    const auto& zones_idx = x_idx;
-    const auto& zones_idx_inv = x_idx_inv;
-    {
-        std::vector<ZoneInfo> zones_sorted(zones.size());
-        for (zone_idx_t i = 0; i < zones_idx.size(); ++i)
-            zones_sorted[i] = zones[zones_idx[i]];
-        zones = zones_sorted;
-    }
 
 
     // Build graph via solvers
-    GraphBuilder graph_builder(zones, zones_idx);
+    GraphBuilder graph_builder(zones);
 
-    ObstacleSolver4 solver_4(graph_builder, zones, zones_idx);
+    ObstacleSolver4 solver_4(graph_builder, zones);
+    std::cout << "Solving 4" << std::endl;
     solver_4.solve();
 
-    ObstacleSolver1 solver_1(graph_builder, zones, zones_idx_inv, x, y, x_idx, y_idx);
+    ObstacleSolver1 solver_1(graph_builder, zones);
+    std::cout << "Solving 1" << std::endl;
     solver_1.solve();
 
-    ObstacleSolver2 solver_2(graph_builder, zones, zones_idx);
+    ObstacleSolver2 solver_2(graph_builder, zones);
+    std::cout << "Solving 2" << std::endl;
     solver_2.solve();
 
-    ObstacleSolver3 solver_3(graph_builder, zones, zones_idx);
+    ObstacleSolver3 solver_3(graph_builder, zones);
+    std::cout << "Solving 3" << std::endl;
     solver_3.solve();
 
 
     // Construct regular graph edges
+    std::cout << "Building" << std::endl;
     auto flow_edges = graph_builder.build();
 
     // Construct flow graph
+    std::cout << "Constructing" << std::endl;
     FlowGraph graph(0, graph_builder.get_zone_input(zones.size()-1), flow_edges);
     
 
     // Find max flow and print
+    std::cout << "Flowing" << std::endl;
     std::cout << graph.maximize_flow() << std::endl;
 
 

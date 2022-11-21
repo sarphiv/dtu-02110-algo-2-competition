@@ -47,16 +47,12 @@ void ObstacleSolver3::solve()
             // If more than two zones are in front of zone_i on the same line, add edges.
             if (count > 2)
             {
-                // Cache indices zone index
-                const auto& zone_j_idx = zones_idx[j];
-                const auto& zone_i_idx = zones_idx[i];
-
                 // If capacity available, add edge from zone_i to zone_j
                 if (zone_i.capacity[O3] > 0)
                     graph_builder.add_edge
                     (
-                        zone_i_idx,
-                        zone_j_idx,
+                        zone_i.idx,
+                        zone_j.idx,
                         O3,
                         zone_i.capacity[O3]
                     );
@@ -65,8 +61,8 @@ void ObstacleSolver3::solve()
                 if (zone_j.capacity[O3] > 0)
                     graph_builder.add_edge
                     (
-                        zone_j_idx,
-                        zone_i_idx,
+                        zone_j.idx,
+                        zone_i.idx,
                         O3,
                         zone_j.capacity[O3]
                     );

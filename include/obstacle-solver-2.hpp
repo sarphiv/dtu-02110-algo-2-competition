@@ -13,18 +13,16 @@ private:
     GraphBuilder& graph_builder;
     const std::vector<ZoneInfo>& zones_sorted;
 
-    const std::vector<zone_idx_t>& zones_idx;
-
 
     zone_coord_dist_t dist(const ZoneInfo &a, const ZoneInfo &b)
     {
-        zone_coord2_t dx = (zone_coord2_t)a.x - (zone_coord2_t)b.x;
-        zone_coord2_t dy = (zone_coord2_t)a.y - (zone_coord2_t)b.y;
+        const zone_coord2_t dx = (zone_coord2_t)a.x - (zone_coord2_t)b.x;
+        const zone_coord2_t dy = (zone_coord2_t)a.y - (zone_coord2_t)b.y;
 
         return sqrt(dx * dx + dy * dy);
     }
 
-    zone_coord2_t cross(const ZoneInfo &o, const ZoneInfo &a, const ZoneInfo &b)
+    zone_coord2_t cross(const ZoneInfo& o, const ZoneInfo& a, const ZoneInfo& b)
     {
         // DISCLAIMER: This function is based on public domain code.
         //  Specifically, Andrew's monotone chain C++ implementation on wikiboks.
@@ -39,17 +37,16 @@ private:
             * ((zone_coord2_t)b.x - (zone_coord2_t)o.x);
     }
 
-    std::tuple<std::vector<ZoneInfo>, std::vector<zone_idx_t>> find_convex_hull();
+    std::vector<ZoneInfo> find_convex_hull();
 
 public:
     ObstacleSolver2() = delete;
     ObstacleSolver2
     (
         GraphBuilder& graph_bulider, 
-        const std::vector<ZoneInfo>& zones_sorted, 
-        const std::vector<zone_idx_t>& zones_idx
+        const std::vector<ZoneInfo>& zones_sorted
     )
-        : graph_builder(graph_bulider), zones_sorted(zones_sorted), zones_idx(zones_idx)
+        : graph_builder(graph_bulider), zones_sorted(zones_sorted)
     {
     }
 

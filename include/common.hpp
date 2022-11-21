@@ -24,6 +24,7 @@ enum ZoneObstacle : zone_obstacle_val_t
 
 struct ZoneInfo
 {
+    zone_idx_t idx;
     zone_coord_t x;
     zone_coord_t y;
     zone_capacity_t capacity[ZONE_OBSTACLE_SIZE];

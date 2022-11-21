@@ -10,8 +10,7 @@
 class GraphBuilder
 {
 private:
-    const std::vector<ZoneInfo>& zones_sorted;
-    const std::vector<zone_idx_t>& zones_idx;
+    const std::vector<ZoneInfo>& zones;
 
 
 public:
@@ -19,8 +18,8 @@ public:
 
 
     GraphBuilder() = delete;
-    GraphBuilder(const std::vector<ZoneInfo>& zones_sorted, const std::vector<zone_idx_t>& zones_idx)
-        : zones_sorted(zones_sorted), zones_idx(zones_idx)
+    GraphBuilder(const std::vector<ZoneInfo>& zones)
+        : zones(zones)
     {
     }
 

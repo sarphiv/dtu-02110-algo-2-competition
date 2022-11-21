@@ -4,15 +4,15 @@
 
 void ObstacleSolver4::solve()
 {
-    zone_idx_t zone_count = zones_sorted.size();
+    zone_idx_t zone_count = zones.size();
 
     for (zone_idx_t i = 0; i < zone_count; ++i)
-        if (zones_sorted[i].capacity[O4] > 0)
+        if (zones[i].capacity[O4] > 0)
             graph_builder.add_edge
             (
-                zones_idx[i],
+                zones[i].idx,
                 zone_count-1,
                 O4,
-                zones_sorted[i].capacity[O4]
+                zones[i].capacity[O4]
             );
 }
