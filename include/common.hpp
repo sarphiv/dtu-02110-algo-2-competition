@@ -8,7 +8,7 @@ using zone_coord_dist_t = double;
 using zone_idx_t = unsigned int;
 using zone_capacity_t = unsigned int;
 // NOTE: Only works if zone_capacity_t is unsigned
-#define ZONE_CAPACITY_MAX ((zone_capacity_t)-1)
+#define ZONE_CAPACITY_MAX ((zone_capacity_t)-2)
 #define ZONE_COORD_MAX (100000)
 
 using zone_obstacle_val_t = unsigned char;
@@ -30,12 +30,4 @@ struct ZoneInfo
     zone_capacity_t capacity[ZONE_OBSTACLE_SIZE];
 };
 
-
-struct ZoneEdge
-{
-    zone_idx_t start;
-    zone_idx_t end;
-    ZoneObstacle obstacle;
-    zone_capacity_t capacity;
-};
 

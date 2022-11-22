@@ -1,53 +1,84 @@
-#include <list>
 #include <vector>
+#include <utility>
+#include <list>
+
+#include "common.hpp"
+#include <flow-graph.hpp>
 
 
-#include "flow-graph.hpp"
+#ifdef FLOW_GRAPH_DFS
+#include <stack>
+#else
+#include <queue>
+#endif
 
 
-FlowGraph::FlowGraph(const node_idx_t& source, const node_idx_t& terminal)
-    : unchanged_since_last_max_flow(false), max_flow(0), node_source(source), node_terminal(terminal)
+
+FlowGraph::FlowGraph(const std::vector<ZoneInfo>& zones, const zone_idx_t source, const zone_idx_t terminal)
+    : zones(zones), 
+    source(get_input(source)), 
+    terminal(get_input(terminal)),
+    node_last(this->terminal + ZONE_OBSTACLE_SIZE)
 {
+    // Add all internal edges for each zone
+    for (zone_idx_t i = 0; i < zones.size(); ++i)
+        for (zone_obstacle_val_t j = 0; j < ZONE_OBSTACLE_SIZE; ++j)
+            if (zones[i].capacity[j] > 0)
+                add_node_edge
+                (
+                    get_input(zones[i].idx),
+                    get_output(zones[i].idx, j),
+                    zones[i].capacity[j]
+                );
 }
 
-FlowGraph::FlowGraph(const node_idx_t& source, const node_idx_t& terminal, const std::list<FlowEdge>& edges)
-    : unchanged_since_last_max_flow(false), max_flow(0), node_source(source), node_terminal(terminal)
+
+void FlowGraph::add_zone_edge
+(
+    const zone_idx_t start, 
+    const zone_idx_t end, 
+    const ZoneObstacle obstacle,
+    const zone_capacity_t capacity
+)
 {
-    add_edges(edges);
+    // Get node indices
+    const auto node_start = get_output(start, obstacle);
+    const auto node_end   = get_input(end);
+
+    // Add edge
+    add_node_edge(node_start, node_end, capacity);
 }
 
-
-
-void FlowGraph::add_edges(const std::list<FlowEdge>& edges)
+void FlowGraph::add_node_edge
+(
+    const node_idx_t node_start, 
+    const node_idx_t node_end, 
+    const node_capacity_t capacity
+)
 {
-    for (const auto& edge : edges)
+    // Edge already exists, add capacity
+    if (contains_edge(node_start, node_end))
     {
-        // Edge already exists, add capacity
-        if (contains_edge(edge.start, edge.end))
-        {
-            auto& forward = get_edge(edge.start, edge.end);
-            forward.capacity += edge.capacity;
-        }
-        else
-        {
-            // Assign forward edge without reverse edge
-            graph[edge.start][edge.end] = Edge(edge.capacity, nullptr);
-
-            // Initialize reverse edge fully
-            graph[edge.end][edge.start] = Edge(0, &get_edge(edge.start, edge.end));
-
-            // Set reverse edge for forward edge
-            graph[edge.start][edge.end].reverse = &get_edge(edge.end, edge.start);
-        }
+        auto& forward = get_edge(node_start, node_end);
+        forward.capacity += capacity;
     }
+    else
+    {
+        // Assign forward edge without reverse edge
+        graph[node_start][node_end] = Edge(capacity, nullptr);
 
+        // Initialize reverse edge fully
+        graph[node_end][node_start] = Edge(0, &get_edge(node_start, node_end));
 
-    unchanged_since_last_max_flow = false;
+        // Set reverse edge for forward edge
+        graph[node_start][node_end].reverse = &get_edge(node_end, node_start);
+    }
 }
 
 
 
-node_map_t FlowGraph::find_predecessors(const node_idx_t& start, const node_idx_t& stop) const
+
+node_map_t FlowGraph::find_predecessors(const node_idx_t start, const node_idx_t stop) const
 {
     // Predecessor index map
     node_map_t predecessor;
@@ -119,29 +150,25 @@ node_map_t FlowGraph::find_predecessors(const node_idx_t& start, const node_idx_
 
 
 
-capacity_t FlowGraph::maximize_flow()
+node_capacity_t FlowGraph::calculate_maximum_flow()
 {
-    // If no new edges, return cached value
-    if (unchanged_since_last_max_flow)
-        return max_flow;
+    // Storage for max flow
+    node_capacity_t max_flow = 0;
 
-
-    // Reset max flow
-    max_flow = 0;
 
     // Store predecessor map of search
     node_map_t predecessors;
 
     // Find path from source to terminal and augment flow repeatedly
-    while ((predecessors = find_predecessors(node_source, node_terminal)).count(node_terminal))
+    while ((predecessors = find_predecessors(source, terminal)).count(terminal))
     {
         // Store traversed edges
         std::list<Edge*> path;
 
         // Find minimum capacity
-        capacity_t min_capacity = CAPACITY_MAX;
-        node_idx_t node_cur = node_terminal;
-        while (node_cur != node_source)
+        node_capacity_t min_capacity = NODE_CAPACITY_MAX;
+        node_idx_t node_cur = terminal;
+        while (node_cur != source)
         {
             auto node_prev = predecessors[node_cur];
             auto& edge = get_edge(node_prev, node_cur);
@@ -165,9 +192,6 @@ capacity_t FlowGraph::maximize_flow()
         max_flow += min_capacity;
     }
 
-
-    // Update cached mark
-    unchanged_since_last_max_flow = true;
 
     // Return max flow
     return max_flow;

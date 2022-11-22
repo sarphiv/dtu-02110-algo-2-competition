@@ -10,7 +10,6 @@
 #include "obstacle-solver-2.hpp"
 #include "obstacle-solver-3.hpp"
 #include "obstacle-solver-4.hpp"
-#include "graph-builder.hpp"
 #include "flow-graph.hpp"
 
 
@@ -18,10 +17,10 @@ std::vector<ZoneInfo>
 load_zones(std::istream& stream)
 {
     // Load zone amount
-    node_idx_t n;
+    zone_idx_t n;
     stream >> n;
 
-    // Load zones and separate coordinates
+    // Load zones
     std::vector<ZoneInfo> zones(n);
 
     for (zone_idx_t i = 0; i < n; ++i)
@@ -46,12 +45,21 @@ load_zones(std::istream& stream)
 
 int main(int argc, char *argv[])
 {
-    // Load zones and separate out coordinates
-    std::ifstream fstream;
-    if (argc > 1) fstream.open(argv[1]);
-    auto zones = load_zones(argc > 1 ? fstream : std::cin);
-    if (argc > 1) fstream.close();
+    // Load zones from either stdin or file (argument)
+    auto zones = [&]()
+    {
+        if (argc > 1)
+        {
+            std::ifstream fstream(argv[1]);
+            auto ret = load_zones(fstream);
+            fstream.close();
 
+            return ret;
+        }
+        else
+            return load_zones(std::cin);
+    }();
+        
 
     // Sort zones by x then y
     argsort<ZoneInfo, zone_idx_t>
@@ -64,38 +72,36 @@ int main(int argc, char *argv[])
     );
 
 
-    // Build graph via solvers
-    GraphBuilder graph_builder(zones);
+    // Create flow graph
+    FlowGraph graph
+    (
+        zones, 
+        0, 
+        zones.size()-1
+    );
 
-    ObstacleSolver4 solver_4(graph_builder, zones);
+
+    // Build graph via solvers
+    ObstacleSolver4 solver_4(graph, zones);
     std::cout << "Solving 4" << std::endl;
     solver_4.solve();
 
-    ObstacleSolver1 solver_1(graph_builder, zones);
+    ObstacleSolver1 solver_1(graph, zones);
     std::cout << "Solving 1" << std::endl;
     solver_1.solve();
 
-    ObstacleSolver2 solver_2(graph_builder, zones);
+    ObstacleSolver2 solver_2(graph, zones);
     std::cout << "Solving 2" << std::endl;
     solver_2.solve();
 
-    ObstacleSolver3 solver_3(graph_builder, zones);
+    ObstacleSolver3 solver_3(graph, zones);
     std::cout << "Solving 3" << std::endl;
     solver_3.solve();
 
 
-    // Construct regular graph edges
-    std::cout << "Building" << std::endl;
-    auto flow_edges = graph_builder.build();
-
-    // Construct flow graph
-    std::cout << "Constructing" << std::endl;
-    FlowGraph graph(0, graph_builder.get_zone_input(zones.size()-1), flow_edges);
-    
-
     // Find max flow and print
     std::cout << "Flowing" << std::endl;
-    std::cout << graph.maximize_flow() << std::endl;
+    std::cout << graph.calculate_maximum_flow() << std::endl;
 
 
     // Return success

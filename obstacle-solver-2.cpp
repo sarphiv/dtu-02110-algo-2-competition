@@ -85,7 +85,7 @@ void ObstacleSolver2::solve()
 
         // Add edge to furthest zone to graph
         if (furthest_idx != zone.idx)
-            graph_builder.add_edge
+            graph.add_zone_edge
             (
                 zone.idx,
                 furthest_idx, 

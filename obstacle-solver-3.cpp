@@ -1,8 +1,8 @@
-#include <robin_map.h>
 #include <list>
 #include <tuple>
 #include <numeric>
 
+#include "robin_map.h"
 
 #include "common.hpp"
 #include "obstacle-solver-3.hpp"
@@ -49,7 +49,7 @@ void ObstacleSolver3::solve()
             {
                 // If capacity available, add edge from zone_i to zone_j
                 if (zone_i.capacity[O3] > 0)
-                    graph_builder.add_edge
+                    graph.add_zone_edge
                     (
                         zone_i.idx,
                         zone_j.idx,
@@ -59,7 +59,7 @@ void ObstacleSolver3::solve()
 
                 // If capacity available, add edge from zone_j to zone_i
                 if (zone_j.capacity[O3] > 0)
-                    graph_builder.add_edge
+                    graph.add_zone_edge
                     (
                         zone_j.idx,
                         zone_i.idx,

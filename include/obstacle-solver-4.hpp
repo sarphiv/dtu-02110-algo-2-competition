@@ -2,20 +2,20 @@
 #include <vector>
 
 #include "common.hpp"
-#include "graph-builder.hpp"
+#include "flow-graph.hpp"
 
 
 class ObstacleSolver4
 {
 private:
-    GraphBuilder& graph_builder;
+    FlowGraph& graph;
     const std::vector<ZoneInfo>& zones;
 
 
 public:
     ObstacleSolver4() = delete;
-    ObstacleSolver4(GraphBuilder& graph_bulider, const std::vector<ZoneInfo>& zones)
-        : graph_builder(graph_bulider), zones(zones)
+    ObstacleSolver4(FlowGraph& graph, const std::vector<ZoneInfo>& zones)
+        : graph(graph), zones(zones)
     {
     }
 

@@ -8,7 +8,7 @@ void ObstacleSolver4::solve()
 
     for (zone_idx_t i = 0; i < zone_count; ++i)
         if (zones[i].capacity[O4] > 0)
-            graph_builder.add_edge
+            graph.add_zone_edge
             (
                 zones[i].idx,
                 zone_count-1,

@@ -17,7 +17,7 @@ void ObstacleSolver1::connect_range(const std::vector<ZoneInfo>& zones, const zo
         if (capacity > 0)
             for (zone_idx_t j = start; j <= end; j++)
                 if (i != j)
-                    graph_builder.add_edge
+                    graph.add_zone_edge
                     (
                         zone_i.idx, 
                         zones[j].idx,
