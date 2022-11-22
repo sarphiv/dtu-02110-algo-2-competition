@@ -1,13 +1,13 @@
-CC = gcc -g
-CXXFLAGS = -g -Wall -Iinclude
-CFLAGS = -g -Wall
-LDFLAGS = -g -L.
-LDLIBS =
-# CC = gcc
-# CXXFLAGS = -Wall -O3 -Iinclude
-# CFLAGS = -Wall
-# LDFLAGS = -L.
-# LDLIBS = 
+# CC = gcc -g
+# CXXFLAGS = -g -Wall -Iinclude
+# CFLAGS = -g -Wall
+# LDFLAGS = -g -L.
+# LDLIBS =
+CC = gcc
+CXXFLAGS = -Wall -O3 -Iinclude
+CFLAGS = -Wall
+LDFLAGS = -L.
+LDLIBS = 
 
 .PHONY: clean
 

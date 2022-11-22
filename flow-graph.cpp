@@ -118,134 +118,79 @@ void FlowGraph::increment_node_edge
 
 
 
-tsl::robin_map<node_idx_t, FlowGraph::Edge*> find_predecessors
-(
-    FlowGraph& graph, 
-    const node_idx_t start, 
-    const node_idx_t stop
-)
+
+void FlowGraph::push(Edge& edge)
 {
-    // Predecessor index map
-    // NOTE: Not mutating graph vectors anymore, so addresses should stay valid.
-    tsl::robin_map<node_idx_t, FlowGraph::Edge*> predecessor;
-
-
-    #ifdef FLOW_GRAPH_DFS
-    // Create DFS stack
-    std::stack<node_idx_t> stack;
-
-    // Enqueue source node
-    stack.push(start);
-    predecessor[start] = nullptr;
-
-
-    // Depth first search
-    while (!stack.empty())
-    {
-        const node_idx_t parent = stack.top();
-        stack.pop();
-
-        auto& edges = graph.get_edges_outgoing(parent);
-        for (node_idx_t edge_idx = 0; edge_idx < edges.size(); ++edge_idx)
-        {
-            auto& edge = edges[edge_idx];
-
-            if (edge.capacity == 0)
-                continue;
-
-            if (!predecessor.contains(edge.end))
-            {
-                predecessor[edge.end] = &edge;
-                stack.push(edge.end);
-            }
-
-
-            if (edge.end == stop)
-                return predecessor;
-        }
-    }
-    
-#else
-    // Create BFS queue
-    std::queue<node_idx_t> queue;
-
-    // Enqueue source node
-    queue.push(start);
-    predecessor[start] = nullptr;
-
-    // Breadth first search
-    while (!queue.empty())
-    {
-        node_idx_t const parent = queue.front();
-        queue.pop();
-
-        for (auto& edge : get_edges_outgoing(parent))
-        {
-            if (edge.capacity == 0)
-                continue;
-            else if (!predecessor.contains(edge.end))
-            {
-                predecessor[edge.end] = &edge;
-                queue.push(edge.end);
-            }
-
-            if (edge.end == stop)
-                return predecessor;
-        }
-    }
-#endif
-
-
-    // No path found, return reached nodes
-    return predecessor;
+    node_capacity_t delta = std::min(excess[edge.start], edge.capacity);
+    edge.capacity -= delta;
+    graph[edge.end][edge.reverse_idx].capacity += delta;
+    excess[edge.start] -= delta;
+    excess[edge.end] += delta;
 }
 
 
+void FlowGraph::relabel(const node_idx_t node)
+{
+    node_idx_t delta = NODE_IDX_MAX;
+    for (const auto& edge : graph[node])
+        if (edge.capacity > 0)
+            delta = std::min(delta, height[edge.end]);
+
+    if (delta < NODE_IDX_MAX)
+        height[node] = delta + 1;
+}
+
+std::vector<node_idx_t> FlowGraph::max_height_nodes() {
+    std::vector<node_idx_t> max_height;
+    for (node_idx_t i = 0; i < height.size(); i++) {
+        if (i != source && i != terminal && excess[i] > 0) {
+            if (!max_height.empty() && height[i] > height[max_height[0]])
+                max_height.clear();
+            if (max_height.empty() || height[i] == height[max_height[0]])
+                max_height.push_back(i);
+        }
+    }
+    return max_height;
+}
 
 node_capacity_t FlowGraph::calculate_maximum_flow()
 {
-    // Storage for max flow
-    node_capacity_t max_flow = 0;
+    height.assign(node_last+1, 0);
+    height[source] = node_last+1;
+
+    excess.assign(node_last+1, 0);
+    excess[source] = NODE_CAPACITY_MAX;
 
 
-    // Store predecessor map of search
-    tsl::robin_map<node_idx_t, FlowGraph::Edge*> predecessors;
+    for (auto& edge : graph[source])
+        push(edge);
 
-    // Find path from source to terminal and augment flow repeatedly
-    while ((predecessors = find_predecessors(*this, source, terminal)).contains(terminal))
+
+    std::vector<node_idx_t> current;
+    while (!(current = max_height_nodes()).empty()) 
     {
-        // Store traversed edges
-        std::vector<Edge*> path;
-
-        // Find minimum capacity
-        node_capacity_t min_capacity = NODE_CAPACITY_MAX;
-        node_idx_t node_curr = terminal;
-        while (node_curr != source)
+        for (node_idx_t i : current) 
         {
-            auto& edge_prev = *predecessors[node_curr];
-            path.push_back(&edge_prev);
-            node_curr = edge_prev.start;
+            bool pushed = false;
+            for (auto& edge : graph[i])
+            {
+                if (!excess[i])
+                    break;
 
-            if (edge_prev.capacity < min_capacity)
-                min_capacity = edge_prev.capacity;
+
+                if (edge.capacity > 0 && height[i] == height[edge.end] + 1) {
+                    push(edge);
+                    pushed = true;
+                }
+            }
+
+            if (!pushed) {
+                relabel(i);
+                break;
+            }
         }
-
-
-        // Update graph
-        for (auto edge_ptr : path)
-        {
-            auto& edge = *edge_ptr;
-            edge.capacity -= min_capacity;
-            graph[edge.end][edge.reverse_idx].capacity += min_capacity;
-        }
-
-
-        // Update max flow
-        max_flow += min_capacity;
     }
 
 
-    // Return max flow
-    return max_flow;
+    return -excess[source];
 }
-

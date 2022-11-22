@@ -95,20 +95,20 @@ int main(int argc, char *argv[])
     // NOTE: Solver 4 must be run before solver 2,
     //  because reliant on terminal node edge being at index 0 in inner adjacency lists
     ObstacleSolver2 solver_2(graph, zones, terminal_idx);
-    // std::cout << "Solving 2" << std::endl;
+    std::cout << "Solving 2" << std::endl;
     solver_2.solve();
 
     ObstacleSolver1 solver_1(graph, zones);
-    // std::cout << "Solving 1" << std::endl;
+    std::cout << "Solving 1" << std::endl;
     solver_1.solve();
 
     ObstacleSolver3 solver_3(graph, zones);
-    // std::cout << "Solving 3" << std::endl;
+    std::cout << "Solving 3" << std::endl;
     solver_3.solve();
 
 
     // Find max flow and print
-    // std::cout << "Flowing" << std::endl;
+    std::cout << "Flowing" << std::endl;
     std::cout << graph.calculate_maximum_flow() << std::endl;
 
 

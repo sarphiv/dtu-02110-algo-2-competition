@@ -34,32 +34,16 @@ private:
     const node_idx_t node_last;
 
     std::vector<std::vector<Edge>> graph;
+    std::vector<node_idx_t> height;
+    std::vector<node_capacity_t> excess;
 
 
-    // const Edge& get_edge(const node_idx_t start, const node_idx_t end) const
-    // {
-    //     return graph.at(start).at(end);
-    // }
+    void push(Edge& edge);
 
-    // Edge& get_edge(const node_idx_t start, const node_idx_t end)
-    // {
-    //     return graph.at(start).at(end);
-    // }
+    void relabel(const node_idx_t node);
 
-
-    // bool contains_edge(const node_idx_t start, const node_idx_t end)
-    // {
-    //     auto it = graph.find(start);
-    //     if (it == graph.end())
-    //         return false;
-
-    //     auto it2 = it->second.find(end);
-    //     if (it2 == it->second.end())
-    //         return false;
-
-    //     return true;
-    // }
-
+    std::vector<node_idx_t> max_height_nodes();
+    
 
 public:
     node_idx_t terminal_base_offset;
