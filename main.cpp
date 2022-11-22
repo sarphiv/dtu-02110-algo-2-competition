@@ -59,7 +59,13 @@ int main(int argc, char *argv[])
         else
             return load_zones(std::cin);
     }();
-        
+
+    // Disallow terminal zone from connecting out
+    const zone_idx_t terminal_idx = zones.size() - 1;
+    {
+        auto& terminal = zones[terminal_idx];
+        terminal.capacity[O1] = 0; terminal.capacity[O2] = 0; terminal.capacity[O3] = 0; terminal.capacity[O4] = 0;
+    }
 
     // Sort zones by x then y
     argsort<ZoneInfo, zone_idx_t>
@@ -77,22 +83,24 @@ int main(int argc, char *argv[])
     (
         zones, 
         0, 
-        zones.size()-1
+        terminal_idx
     );
 
 
     // Build graph via solvers
-    ObstacleSolver4 solver_4(graph, zones);
+    ObstacleSolver4 solver_4(graph, zones, terminal_idx);
     std::cout << "Solving 4" << std::endl;
     solver_4.solve();
+
+    // NOTE: Solver 4 must be run before solver 2,
+    //  because reliant on terminal node edge being at index 0 in inner adjacency lists
+    ObstacleSolver2 solver_2(graph, zones, terminal_idx);
+    std::cout << "Solving 2" << std::endl;
+    solver_2.solve();
 
     ObstacleSolver1 solver_1(graph, zones);
     std::cout << "Solving 1" << std::endl;
     solver_1.solve();
-
-    ObstacleSolver2 solver_2(graph, zones);
-    std::cout << "Solving 2" << std::endl;
-    solver_2.solve();
 
     ObstacleSolver3 solver_3(graph, zones);
     std::cout << "Solving 3" << std::endl;

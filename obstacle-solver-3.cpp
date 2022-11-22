@@ -34,21 +34,24 @@ void ObstacleSolver3::solve()
             // Cache second zone
             const auto& zone_j = zones_sorted[j];
 
+
             // Increment slope zone counter
-            // NOTE: dx is never negative. This hash is unique.
-            //  May be able to mathematically reduce because of gcd.
-            // const long long hash = (long long)dx + (long long)dy * (ZONE_COORD_MAX + 1);
+            // NOTE: dx is never negative. This hash is unique for each line.
             const double slope = 
-                (double)((zone_coord_signed_t)zone_j.y - (zone_coord_signed_t)zone_i.y) 
+                  (double)((zone_coord_signed_t)zone_j.y - (zone_coord_signed_t)zone_i.y) 
                 / (double)(zone_j.x - zone_i.x);
-            const auto& count = ++slope_counter[slope];
+            const auto count = ++slope_counter[slope];
 
 
             // If more than two zones are in front of zone_i on the same line, add edges.
             if (count > 2)
             {
+                // NOTE: Edges are not mirrored. 
+                //  The edges start from real output nodes rather than virtual output nodes.
+                //  A virtual output node is an input node also working as an output node.
+
                 // If capacity available, add edge from zone_i to zone_j
-                if (zone_i.capacity[O3] > 0)
+                if ((zone_i.capacity[O3] > 0))
                     graph.add_zone_edge
                     (
                         zone_i.idx,

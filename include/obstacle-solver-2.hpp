@@ -11,7 +11,9 @@ class ObstacleSolver2
 {
 private:
     FlowGraph& graph;
+    // NOTE: Needs to be sorted to find convex hull in O(n) time
     const std::vector<ZoneInfo>& zones_sorted;
+    const zone_idx_t terminal_idx;
 
 
     zone_coord_dist_t dist(const ZoneInfo &a, const ZoneInfo &b)
@@ -37,16 +39,17 @@ private:
             * ((zone_coord2_t)b.x - (zone_coord2_t)o.x);
     }
 
-    std::vector<ZoneInfo> find_convex_hull();
+    std::tuple<std::vector<ZoneInfo>, std::vector<zone_idx_t>> find_convex_hull();
 
 public:
     ObstacleSolver2() = delete;
     ObstacleSolver2
     (
         FlowGraph& graph, 
-        const std::vector<ZoneInfo>& zones_sorted
+        const std::vector<ZoneInfo>& zones_sorted,
+        const zone_idx_t terminal_idx
     )
-        : graph(graph), zones_sorted(zones_sorted)
+        : graph(graph), zones_sorted(zones_sorted), terminal_idx(terminal_idx)
     {
     }
 

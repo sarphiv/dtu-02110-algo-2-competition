@@ -12,7 +12,6 @@ class ObstacleSolver3
 {
 private:
     FlowGraph& graph;
-
     const std::vector<ZoneInfo>& zones_sorted;
 
 

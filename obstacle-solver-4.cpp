@@ -4,15 +4,15 @@
 
 void ObstacleSolver4::solve()
 {
-    zone_idx_t zone_count = zones.size();
-
-    for (zone_idx_t i = 0; i < zone_count; ++i)
-        if (zones[i].capacity[O4] > 0)
+    for (const auto& zone : zones)
+        if (zone.capacity[O4] > 0)
             graph.add_zone_edge
             (
-                zones[i].idx,
-                zone_count-1,
+                zone.idx,
+                terminal_idx,
                 O4,
-                zones[i].capacity[O4]
+                zone.capacity[O4]
             );
+
+    ++graph.terminal_base_offset;
 }
