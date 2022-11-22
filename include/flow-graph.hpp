@@ -93,10 +93,8 @@ public:
     }
 
 
-    node_idx_t get_terminal_offset(zone_idx_t zone_idx) const
+    node_idx_t get_terminal_offset(const ZoneInfo& zone) const
     {
-        const auto& zone = zones[zone_idx];
-
         return terminal_base_offset +
             (zone.capacity[O1] > 0) +
             (zone.capacity[O3] > 0);

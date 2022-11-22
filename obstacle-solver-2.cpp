@@ -80,7 +80,7 @@ void ObstacleSolver2::solve()
     
     for (zone_idx_t i = 0; i < zones_sorted.size(); ++i)
     {
-        if ((processed[i] != ZONE_IDX_MAX) | (processed[i] == ZONE_IDX_NONE))
+        if (processed[i] != ZONE_IDX_MAX)
             continue;
 
 
@@ -88,8 +88,7 @@ void ObstacleSolver2::solve()
         //  A pair of matching zones have each other as furthest zones.
         zone_idx_t zone_curr_rank = i;
         zone_idx_signed_t steps = 0;
-        while ((processed[zone_curr_rank] == ZONE_IDX_MAX)
-            &  (processed[zone_curr_rank] != ZONE_IDX_NONE))
+        while (processed[zone_curr_rank] == ZONE_IDX_MAX)
         {
             // Cache zone
             ZoneInfo zone = zones_sorted[zone_curr_rank];
@@ -131,8 +130,12 @@ void ObstacleSolver2::solve()
         // Connect all except last zones in the path
         zone_idx_t zone_prev_rank = i;
         zone_curr_rank = processed[i];
-        for (zone_idx_signed_t j = 0; j < steps-2; ++j)
+        zone_idx_t steps_i = steps;
+        for (zone_idx_signed_t j = 0; j < steps - 2; ++j)
         {
+            // Take step
+            --steps_i;
+
             // Cache zones
             ZoneInfo zone_prev = zones_sorted[zone_prev_rank];
             ZoneInfo zone_curr = zones_sorted[zone_curr_rank];
@@ -157,13 +160,13 @@ void ObstacleSolver2::solve()
 
 
         // If there is a final (last) step, process it
-        if (steps > 0)
+        if (steps_i > 0)
         {
             // Get rank of next zone
             const zone_idx_t zone_next_rank = processed[zone_curr_rank];
 
             
-            // If there are threee zones in the path left, connect them
+            // If there are three zones in the path left, connect them
             // NOTE: This means there is circular match
             if (zone_next_rank != zone_prev_rank)
             {
@@ -177,7 +180,7 @@ void ObstacleSolver2::solve()
                     graph.increment_zone_edge
                     (
                         zone_start.idx, 
-                        graph.get_terminal_offset(zone_start.idx),
+                        graph.get_terminal_offset(zone_start),
                         O2,
                         zone_start.capacity[O2]
                     );
@@ -193,7 +196,7 @@ void ObstacleSolver2::solve()
                 
 
                 // If next zone leads nowhere, do not connect
-                if ((zone_next_rank == ZONE_IDX_MAX) | (zone_next_rank == ZONE_IDX_NONE))
+                if (--steps_i == 0)
                     continue;
 
 
@@ -207,7 +210,7 @@ void ObstacleSolver2::solve()
                     graph.increment_zone_edge
                     (
                         zone_start.idx,
-                        graph.get_terminal_offset(zone_start.idx),
+                        graph.get_terminal_offset(zone_start),
                         O2,
                         zone_start.capacity[O2]
                     );

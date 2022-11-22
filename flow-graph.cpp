@@ -4,21 +4,6 @@
 
 #include "robin_map.h"
 
-
-
-
-
-
-
-#include <iostream>
-
-
-
-
-
-
-
-
 #include "common.hpp"
 #include <flow-graph.hpp>
 
@@ -78,7 +63,6 @@ void FlowGraph::add_zone_edge
     const zone_capacity_t capacity_backward
 )
 {
-    std::cout << start << " " << end << " " << capacity_forward << std::endl;
     add_node_edge
     (
         get_output(start, obstacle),
@@ -134,9 +118,6 @@ void FlowGraph::increment_node_edge
 
 
 
-
-
-
 tsl::robin_map<node_idx_t, FlowGraph::Edge*> find_predecessors
 (
     FlowGraph& graph, 
@@ -161,7 +142,7 @@ tsl::robin_map<node_idx_t, FlowGraph::Edge*> find_predecessors
     // Depth first search
     while (!stack.empty())
     {
-        node_idx_t const parent = stack.top();
+        const node_idx_t parent = stack.top();
         stack.pop();
 
         auto& edges = graph.get_edges_outgoing(parent);

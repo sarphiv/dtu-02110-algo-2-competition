@@ -13,6 +13,4 @@ void ObstacleSolver4::solve()
                 O4,
                 zone.capacity[O4]
             );
-
-    ++graph.terminal_base_offset;
 }
