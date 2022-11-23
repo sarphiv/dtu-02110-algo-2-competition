@@ -13,10 +13,14 @@ struct hash_double
 {
     inline std::size_t operator()(const double& val) const
     {
-        // NOTE: No need to handle -0.0 vs. 0.0 because never -0.0.
-        //  This is because delta_x further below is >= 0.0,
-        //  and all points are unique.
-        return *((int64_t*)(&val)) % 1099511628211;
+        // Based upon xxHash at: https://github.com/Cyan4973/xxHash
+        int64_t hash = *((int64_t*)(&val));
+        hash ^= hash >> 33;
+        hash *= 14029467366897019727UL;
+        hash ^= hash >> 29;
+        hash *= 1609587929392839161UL;
+        hash ^= hash >> 32;
+        return hash;
     }
 };
 
