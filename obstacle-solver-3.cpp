@@ -11,16 +11,12 @@
 
 struct hash_double
 {
-    std::size_t operator()(const double& val) const
+    inline std::size_t operator()(const double& val) const
     {
-        if (val == 0.0)
-            return 0;
-        else
-        {
-            // const int64_t value = *((int64_t*)(&val));
-            // return (int32_t)(value >> 32) ^ (int32_t)value;
-            return *((int64_t*)(&val)) % 1099511628211;
-        }
+        // NOTE: No need to handle -0.0 vs. 0.0 because never -0.0.
+        //  This is because delta_x further below is >= 0.0,
+        //  and all points are unique.
+        return *((int64_t*)(&val)) % 1099511628211;
     }
 };
 
