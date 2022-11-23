@@ -5,15 +5,11 @@
 #include "flow-graph.hpp"
 
 
-using obstacle_solver_3_line_val_t = float;
-
-
 class ObstacleSolver3
 {
 private:
     FlowGraph& graph;
     const std::vector<ZoneInfo>& zones_sorted;
-
 
 
 public:

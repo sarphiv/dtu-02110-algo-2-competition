@@ -9,11 +9,29 @@
 
 
 
+struct hash_double
+{
+    std::size_t operator()(const double& val) const
+    {
+        if (val == 0.0)
+            return 0;
+        else
+        {
+            // const int64_t value = *((int64_t*)(&val));
+            // return (int32_t)(value >> 32) ^ (int32_t)value;
+            return *((int64_t*)(&val)) % 1099511628211;
+        }
+    }
+};
+
+
 void ObstacleSolver3::solve()
 {
     // Counter for zones on the same line (all lines go through zone_i)
     // NOTE: Defined out here to avoid reallocating memory
-    emhash8::HashMap<double, zone_idx_t> slope_counter;
+    emhash8::HashMap<double, zone_idx_t, hash_double> slope_counter;
+    slope_counter.reserve(zones_sorted.size()*2);
+    slope_counter.max_load_factor(0.6);
 
 
     // Loop through all zones sorted by x and y
@@ -36,10 +54,11 @@ void ObstacleSolver3::solve()
 
 
             // Increment slope zone counter
-            // NOTE: dx is never negative. This hash is unique for each line.
+            // NOTE: dx is never negative, and if dx == 0, then dy > 0, so always +inf
             const double slope = 
                   (double)((zone_coord_signed_t)zone_j.y - (zone_coord_signed_t)zone_i.y) 
                 / (double)(zone_j.x - zone_i.x);
+
             const auto count = ++slope_counter[slope];
 
 
