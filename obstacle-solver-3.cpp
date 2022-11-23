@@ -2,7 +2,7 @@
 #include <tuple>
 #include <numeric>
 
-#include "robin_map.h"
+#include "emhash.h"
 
 #include "common.hpp"
 #include "obstacle-solver-3.hpp"
@@ -13,7 +13,7 @@ void ObstacleSolver3::solve()
 {
     // Counter for zones on the same line (all lines go through zone_i)
     // NOTE: Defined out here to avoid reallocating memory
-    tsl::robin_map<double, zone_idx_t> slope_counter;
+    emhash8::HashMap<double, zone_idx_t> slope_counter;
 
 
     // Loop through all zones sorted by x and y

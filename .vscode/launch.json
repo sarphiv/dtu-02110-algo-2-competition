@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/main",
-            "args": ["Competition019.in"],
+            "args": ["Competition017.in"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],

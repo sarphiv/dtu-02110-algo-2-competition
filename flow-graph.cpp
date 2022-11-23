@@ -20,8 +20,8 @@ FlowGraph::FlowGraph(const std::vector<ZoneInfo>& zones, const zone_idx_t source
     : zones(zones), 
     source(get_input(source)), 
     terminal(get_input(terminal)),
-    node_last(this->terminal + ZONE_OBSTACLE_NODE_STRIDE - 1),
-    graph(node_last + 1, std::vector<Edge>()),
+    node_size(this->terminal + ZONE_OBSTACLE_NODE_STRIDE),
+    graph(node_size, std::vector<Edge>()),
     terminal_base_offset(0)
 {
     // Add all internal edges for each zone
@@ -119,78 +119,93 @@ void FlowGraph::increment_node_edge
 
 
 
-void FlowGraph::push(Edge& edge)
-{
-    node_capacity_t delta = std::min(excess[edge.start], edge.capacity);
-    edge.capacity -= delta;
-    graph[edge.end][edge.reverse_idx].capacity += delta;
-    excess[edge.start] -= delta;
-    excess[edge.end] += delta;
-}
 
 
-void FlowGraph::relabel(const node_idx_t node)
-{
-    node_idx_t delta = NODE_IDX_MAX;
-    for (const auto& edge : graph[node])
-        if (edge.capacity > 0)
-            delta = std::min(delta, height[edge.end]);
 
-    if (delta < NODE_IDX_MAX)
-        height[node] = delta + 1;
-}
-
-std::vector<node_idx_t> FlowGraph::max_height_nodes() {
-    std::vector<node_idx_t> max_height;
-    for (node_idx_t i = 0; i < height.size(); i++) {
-        if (i != source && i != terminal && excess[i] > 0) {
-            if (!max_height.empty() && height[i] > height[max_height[0]])
-                max_height.clear();
-            if (max_height.empty() || height[i] == height[max_height[0]])
-                max_height.push_back(i);
-        }
+// Push-Relabel based on: https://github.com/mochow13/competitive-programming-library/blob/master/Graph/Push%20Relabel%202.cpp
+void FlowGraph::enqueue(node_idx_t v) {
+    if (!active[v] && excess[v] > 0 && dist[v] < node_size) {
+        active[v] = true;
+        B[dist[v]].push_back(v);
+        b = std::max(b, dist[v]);
     }
-    return max_height;
 }
 
-node_capacity_t FlowGraph::calculate_maximum_flow()
-{
-    height.assign(node_last+1, 0);
-    height[source] = node_last+1;
+void FlowGraph::push(Edge& edge) {
+    node_capacity_t amt = std::min(excess[edge.start], edge.capacity);
+    if (dist[edge.start] == dist[edge.end] + 1 && amt > 0) {
+        edge.capacity -= amt;
+        graph[edge.end][edge.reverse_idx].capacity += amt;
+        excess[edge.end] += amt;    
+        excess[edge.start] -= amt;
+        enqueue(edge.end);
+    }
+}
 
-    excess.assign(node_last+1, 0);
-    excess[source] = NODE_CAPACITY_MAX;
+void FlowGraph::gap(node_idx_t k) {
+    for (node_idx_t v = 0; v < node_size; v++) if (dist[v] >= k) {
+        --count[dist[v]];
+        dist[v] = std::max(dist[v], node_size);
+        ++count[dist[v]];
+        enqueue(v);
+    }
+}
 
+void FlowGraph::relabel(node_idx_t v) {
+    count[dist[v]]--;
+    dist[v] = node_size;
+    for (const auto& edge: graph[v]) if (edge.capacity > 0) {
+        dist[v] = std::min(dist[v], dist[edge.end] + 1);
+    }
+    count[dist[v]]++;
+    enqueue(v);
+}
 
-    for (auto& edge : graph[source])
-        push(edge);
-
-
-    std::vector<node_idx_t> current;
-    while (!(current = max_height_nodes()).empty()) 
-    {
-        for (node_idx_t i : current) 
-        {
-            bool pushed = false;
-            for (auto& edge : graph[i])
-            {
-                if (!excess[i])
-                    break;
-
-
-                if (edge.capacity > 0 && height[i] == height[edge.end] + 1) {
-                    push(edge);
-                    pushed = true;
-                }
-            }
-
-            if (!pushed) {
-                relabel(i);
-                break;
-            }
+void FlowGraph::discharge(node_idx_t v) {
+    for (auto &edge: graph[v]) {
+        if (excess[v] > 0) {
+            push(edge);
+        } else {
+            break;
         }
     }
 
+    if (excess[v] > 0) {
+        if (count[dist[v]] == 1) {
+            gap(dist[v]); 
+        } else {
+            relabel(v);
+        }
+    }
+}
 
-    return -excess[source];
+node_capacity_t FlowGraph::calculate_maximum_flow() {   
+    b = 0;
+    dist.assign(node_size, 0);
+    excess.assign(node_size, 0);
+    count.assign(node_size + 1, 0);
+    active.assign(node_size, false);
+    B = std::vector<std::vector<node_idx_t>>(node_size, std::vector<node_idx_t>());
+
+
+    for (const auto &edge: graph[source]) {
+        excess[source] += edge.capacity;
+    }
+
+    count[0] = node_size;
+    enqueue(source);
+    active[terminal] = true;
+    
+    while (b != NODE_IDX_MAX) {
+        if (!B[b].empty()) {
+            node_idx_t v = B[b].back();
+            B[b].pop_back();
+            active[v] = false;
+            discharge(v);
+        } else {
+            b--;
+        }
+    }
+
+    return excess[terminal];
 }

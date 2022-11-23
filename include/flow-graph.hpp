@@ -6,12 +6,12 @@
 
 
 
-using node_capacity_t = unsigned long long;
+using node_capacity_t = long long;
 using node_idx_t = unsigned int;
 // NOTE: The below trick to find the max only works 
 //  if the capacity type is unsigned.
 #define NODE_CAPACITY_MAX ((node_capacity_t)-2)
-#define NODE_IDX_MAX ((node_idx_t)-2)
+#define NODE_IDX_MAX ((node_idx_t)-1)
 
 #define FLOW_GRAPH_DFS 1
 
@@ -31,16 +31,22 @@ public:
 private:
     const std::vector<ZoneInfo>& zones;
     const node_idx_t source, terminal;
-    const node_idx_t node_last;
+    const node_idx_t node_size;
 
     std::vector<std::vector<Edge>> graph;
     std::vector<node_idx_t> height;
     std::vector<node_capacity_t> excess;
+    std::vector<node_idx_t> dist, count;
+    std::vector<bool> active;
+    std::vector<std::vector<node_idx_t>> B;
+    node_idx_t b;
 
 
-    void push(Edge& edge);
-
+    void push(Edge &edge);
     void relabel(const node_idx_t node);
+    void discharge(node_idx_t v);
+    void gap(node_idx_t k);
+    void enqueue(node_idx_t v);
 
     std::vector<node_idx_t> max_height_nodes();
     
