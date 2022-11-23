@@ -13,8 +13,6 @@ using node_idx_t = unsigned int;
 #define NODE_CAPACITY_MAX ((node_capacity_t)-2)
 #define NODE_IDX_MAX ((node_idx_t)-1)
 
-#define FLOW_GRAPH_DFS 1
-
 
 class FlowGraph
 {
@@ -33,20 +31,26 @@ private:
     const node_idx_t source, terminal;
     const node_idx_t node_size;
 
+    // Adjacency list of graph
     std::vector<std::vector<Edge>> graph;
-    std::vector<node_idx_t> height;
+    // Excess flow of each node
     std::vector<node_capacity_t> excess;
-    std::vector<node_idx_t> dist, count;
+    // Height of each node, and amount of nodes at each height
+    std::vector<node_idx_t> height, count;
+    // Nodes enqueued for discharge
+    // Maps height to stack of nodes to discharge at that height
+    std::vector<std::vector<node_idx_t>> discharge_stack;
     std::vector<bool> active;
-    std::vector<std::vector<node_idx_t>> B;
-    node_idx_t b;
+    // Max height of active (enqueued) nodes
+    // NOTE: So this only includes nodes where excess flow has not flowed back to source
+    node_idx_t active_max_height;
 
 
     void push(Edge &edge);
     void relabel(const node_idx_t node);
     void discharge(node_idx_t v);
-    void gap(node_idx_t k);
-    void enqueue(node_idx_t v);
+    void relabel_gap(node_idx_t k);
+    void discharge_stack_enqueue(node_idx_t v);
 
     std::vector<node_idx_t> max_height_nodes();
     

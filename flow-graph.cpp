@@ -8,22 +8,28 @@
 #include <flow-graph.hpp>
 
 
-#ifdef FLOW_GRAPH_DFS
-#include <stack>
-#else
-#include <queue>
-#endif
-
-
 
 FlowGraph::FlowGraph(const std::vector<ZoneInfo>& zones, const zone_idx_t source, const zone_idx_t terminal)
     : zones(zones), 
-    source(get_input(source)), 
-    terminal(get_input(terminal)),
+    source(get_input(source)), terminal(get_input(terminal)),
     node_size(this->terminal + ZONE_OBSTACLE_NODE_STRIDE),
+
     graph(node_size, std::vector<Edge>()),
+    excess(node_size, 0),
+    height(node_size, 0), count(node_size+1, 0),
+    discharge_stack(node_size, std::vector<node_idx_t>()),
+    active(node_size, false),
+    active_max_height(0),
     terminal_base_offset(0)
 {
+    // Mark terminal as enqueued to prevent requeueing
+    //  as there should never be a discharge from the terminal
+    active[this->terminal] = true;
+
+    // All nodes start at height 0
+    count[0] = node_size;
+
+
     // Add all internal edges for each zone
     for (zone_idx_t i = 0; i < zones.size(); ++i)
     {
@@ -122,90 +128,157 @@ void FlowGraph::increment_node_edge
 
 
 
-// Push-Relabel based on: https://github.com/mochow13/competitive-programming-library/blob/master/Graph/Push%20Relabel%202.cpp
-void FlowGraph::enqueue(node_idx_t v) {
-    if (!active[v] && excess[v] > 0 && dist[v] < node_size) {
-        active[v] = true;
-        B[dist[v]].push_back(v);
-        b = std::max(b, dist[v]);
+// Push-Relabel (max height version) based heavily on: https://github.com/mochow13/competitive-programming-library/blob/master/Graph/Push%20Relabel%202.cpp
+// Explanation for base algorithm: http://www.adrian-haarbach.de/idp-graph-algorithms/implementation/maxflow-push-relabel/index_en.html
+
+void FlowGraph::discharge_stack_enqueue(node_idx_t node_idx)
+{
+    // If node is not already in queue, 
+    //  and there is excess to discharge, 
+    //  and excess has not flowed back to source from it,
+    //  enqueue node to stack for discharge.
+    if ((!active[node_idx]) & (excess[node_idx] > 0) & (height[node_idx] < node_size))
+    {
+        // Mark node as enqueued
+        active[node_idx] = true;
+
+        // Enqueue to associated height stack
+        // NOTE: Some heights may be above node_size, 
+        //  but those are filtered out by the height check above.
+        discharge_stack[height[node_idx]].push_back(node_idx);
+
+        // Update enqueued max height
+        active_max_height = std::max(active_max_height, height[node_idx]);
     }
 }
 
-void FlowGraph::push(Edge& edge) {
-    node_capacity_t amt = std::min(excess[edge.start], edge.capacity);
-    if (dist[edge.start] == dist[edge.end] + 1 && amt > 0) {
-        edge.capacity -= amt;
-        graph[edge.end][edge.reverse_idx].capacity += amt;
-        excess[edge.end] += amt;    
-        excess[edge.start] -= amt;
-        enqueue(edge.end);
+
+void FlowGraph::push(Edge& edge)
+{
+    // Calculate minimum excess that can be pushed
+    node_capacity_t delta = std::min(excess[edge.start], edge.capacity);
+
+    // Push allowable excess
+    edge.capacity -= delta;
+    graph[edge.end][edge.reverse_idx].capacity += delta;
+
+    // Update excess
+    excess[edge.end] += delta;    
+    excess[edge.start] -= delta;
+
+    // Enqueue end node, because it now has excess
+    discharge_stack_enqueue(edge.end);
+}
+
+
+void FlowGraph::relabel_gap(node_idx_t height_limit)
+{
+    // Loop through all heights for nodes
+    for (node_idx_t node_idx = 0; node_idx < height.size(); node_idx++) 
+    {
+        // If node is above or equal to limit, 
+        //  ensure it is at least node_size high and enqueue for discharge (likely relabel)
+        if (height[node_idx] >= height_limit)
+        {
+            if (height[node_idx] < node_size)
+            {
+                --count[height[node_idx]];
+                ++count[node_size];
+                height[node_idx] = node_size;
+            }
+
+            discharge_stack_enqueue(node_idx);
+        }
     }
 }
 
-void FlowGraph::gap(node_idx_t k) {
-    for (node_idx_t v = 0; v < node_size; v++) if (dist[v] >= k) {
-        --count[dist[v]];
-        dist[v] = std::max(dist[v], node_size);
-        ++count[dist[v]];
-        enqueue(v);
-    }
+
+void FlowGraph::relabel(node_idx_t node_idx)
+{
+    // Relabelling, so needs to subtract one from counter for associated height
+    count[height[node_idx]]--;
+
+    // Find minimum height of reachable neighbors
+    node_idx_t min_height = node_size;
+    for (const auto& edge: graph[node_idx])
+        if ((edge.capacity > 0) & (height[edge.end] < min_height)) 
+            min_height = height[edge.end];
+
+    // Update height
+    height[node_idx] = min_height + 1;
+    count[min_height + 1]++;
+
+    // Enqueue again because there was excess left to discharge since it was relabelled
+    discharge_stack_enqueue(node_idx);
 }
 
-void FlowGraph::relabel(node_idx_t v) {
-    count[dist[v]]--;
-    dist[v] = node_size;
-    for (const auto& edge: graph[v]) if (edge.capacity > 0) {
-        dist[v] = std::min(dist[v], dist[edge.end] + 1);
-    }
-    count[dist[v]]++;
-    enqueue(v);
-}
 
-void FlowGraph::discharge(node_idx_t v) {
-    for (auto &edge: graph[v]) {
-        if (excess[v] > 0) {
-            push(edge);
-        } else {
+void FlowGraph::discharge(node_idx_t node_idx)
+{
+    // Attempt discharging from node to all neighbors
+    for (auto& edge: graph[node_idx])
+    {
+        // If no more excess to discharge, break
+        if (excess[node_idx] == 0)
             break;
-        }
+        // Else if capable of pushing, push excess along edge
+        else if ((height[edge.start] == height[edge.end] + 1) & (edge.capacity > 0))
+            push(edge);
     }
 
-    if (excess[v] > 0) {
-        if (count[dist[v]] == 1) {
-            gap(dist[v]); 
-        } else {
-            relabel(v);
-        }
+
+    // If there is still excess, node needs to be relabeled
+    if (excess[node_idx] > 0)
+    {
+        // If there are no more nodes of this height, relabel all nodes above or equal to this height
+        // NOTE: Since excess only flows from height + 1 to height,
+        //  the flow will become broken by relabelling.
+        //  Needs to relabel multiple nodes to ensure flow is not broken from source.
+        //  The call to relabel_gap will cause all nodes above this height to be relabelled via the discharge queue.
+        if (count[height[node_idx]] == 1)
+            relabel_gap(height[node_idx]); 
+        // Else, relabel node to be one higher than minimum height reachable neighbor
+        else
+            relabel(node_idx);
     }
 }
 
-node_capacity_t FlowGraph::calculate_maximum_flow() {   
-    b = 0;
-    dist.assign(node_size, 0);
-    excess.assign(node_size, 0);
-    count.assign(node_size + 1, 0);
-    active.assign(node_size, false);
-    B = std::vector<std::vector<node_idx_t>>(node_size, std::vector<node_idx_t>());
+node_capacity_t FlowGraph::calculate_maximum_flow()
+{
+    // WARN: This function may only be called once.
+    //  It may not work if called again, because mutations are not reset.
 
 
-    for (const auto &edge: graph[source]) {
+    // Preload source with excess equal to maximum possible flow out
+    for (const auto &edge: graph[source])
         excess[source] += edge.capacity;
-    }
 
-    count[0] = node_size;
-    enqueue(source);
-    active[terminal] = true;
-    
-    while (b != NODE_IDX_MAX) {
-        if (!B[b].empty()) {
-            node_idx_t v = B[b].back();
-            B[b].pop_back();
-            active[v] = false;
-            discharge(v);
-        } else {
-            b--;
+    // Enqueue source for discharge
+    discharge_stack_enqueue(source);
+
+
+    // While there are still nodes with excess flow to discharge
+    // NOTE: Intentionally waiting for overflow to max to occur
+    while (active_max_height != NODE_IDX_MAX)
+    {
+        // If node available in associated height stack, discharge it
+        if (!discharge_stack[active_max_height].empty())
+        {
+            // Retrieve node
+            node_idx_t node_idx = discharge_stack[active_max_height].back();
+            discharge_stack[active_max_height].pop_back();
+            active[node_idx] = false;
+
+            // Discharge node
+            discharge(node_idx);
         }
+        // Else, there were no nodes, decrement active max height
+        // NOTE: Intentionally waiting for overflow to max to occur
+        else 
+            active_max_height--;
     }
 
+
+    // Return accumulated excess in terminal node (maximum flow)
     return excess[terminal];
 }
