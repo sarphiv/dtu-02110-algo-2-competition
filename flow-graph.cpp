@@ -12,11 +12,12 @@
 FlowGraph::FlowGraph(const std::vector<ZoneInfo>& zones, const zone_idx_t source, const zone_idx_t terminal)
     : zones(zones), 
     source(get_input(source)), terminal(get_input(terminal)),
-    node_size(this->terminal + ZONE_OBSTACLE_NODE_STRIDE),
+    // NOTE: Not adding more, because terminal node has no output nodes
+    node_size(this->terminal + 1),
 
     graph(node_size, std::vector<Edge>()),
     excess(node_size, 0),
-    height(node_size, 0), count(node_size+1, 0),
+    height(node_size, 0), count(node_size+2, 0),
     discharge_stack(node_size, std::vector<node_idx_t>()),
     active(node_size, false),
     active_max_height(0),
