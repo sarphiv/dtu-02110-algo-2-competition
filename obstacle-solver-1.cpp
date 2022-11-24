@@ -38,7 +38,7 @@ void ObstacleSolver1::solve()
         {
             return zone.x;
         },
-        [&](const zone_idx_t &start, const zone_idx_t &end)
+        [&](const zone_idx_t start, const zone_idx_t end)
         { 
             connect_range(zones_sorted, start, end); 
         }
@@ -50,7 +50,7 @@ void ObstacleSolver1::solve()
     argsort<ZoneInfo, zone_idx_t>
     (
         zones_sorted_y, 
-        [&](const zone_idx_t &a, const zone_idx_t &b)
+        [&](const zone_idx_t a, const zone_idx_t b)
         {
             return zones_sorted_y[a].y < zones_sorted_y[b].y;
         }
@@ -64,7 +64,7 @@ void ObstacleSolver1::solve()
         {
             return zone.y;
         },
-        [&](const zone_idx_t &start, const zone_idx_t &end)
+        [&](const zone_idx_t start, const zone_idx_t end)
         { 
             connect_range(zones_sorted_y, start, end); 
         }

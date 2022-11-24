@@ -10,7 +10,7 @@
 
 template <typename TData, typename TIndex>
 std::tuple<std::vector<TIndex>, std::vector<TIndex>>
-argsort(const TIndex& size, const std::function<bool(const TIndex&, const TIndex&)>& comp, const bool& inverse_index)
+argsort(const TIndex& size, const std::function<bool(const TIndex, const TIndex)>& comp, const bool inverse_index)
 {
 
     // Get indexes to sort
@@ -44,7 +44,7 @@ argsort(const TIndex& size, const std::function<bool(const TIndex&, const TIndex
 
 template <typename TData, typename TIndex>
 std::vector<TIndex>
-argsort(const TIndex& size, const std::function<bool(const TIndex&, const TIndex&)>& comp)
+argsort(const TIndex& size, const std::function<bool(const TIndex, const TIndex)>& comp)
 {
     return std::get<0>(argsort<TData, TIndex>(size, comp, false));
 }
@@ -52,7 +52,7 @@ argsort(const TIndex& size, const std::function<bool(const TIndex&, const TIndex
 
 template <typename TData, typename TIndex>
 std::tuple<std::vector<TIndex>, std::vector<TIndex>>
-argsort(std::vector<TData>& data, const std::function<bool(const TIndex&, const TIndex&)>& comp, const bool& inverse_index)
+argsort(std::vector<TData>& data, const std::function<bool(const TIndex, const TIndex)>& comp, const bool inverse_index)
 {
     // Get sorted indexes
     auto [idx, idx_inv] = argsort<TData, TIndex>(data.size(), comp, inverse_index);
@@ -71,11 +71,11 @@ argsort(std::vector<TData>& data, const std::function<bool(const TIndex&, const 
 
 template <typename TData, typename TIndex>
 std::tuple<std::vector<TIndex>, std::vector<TIndex>>
-argsort(std::vector<TData>& data, const bool& inverse_index)
+argsort(std::vector<TData>& data, const bool inverse_index)
 {
     return argsort<TData, TIndex>(
         data,
-        [&](const TIndex& i1, const TIndex& i2) -> bool { return data[i1] < data[i2]; },
+        [&](const TIndex i1, const TIndex i2) -> bool { return data[i1] < data[i2]; },
         inverse_index
     );
 }
@@ -83,7 +83,7 @@ argsort(std::vector<TData>& data, const bool& inverse_index)
 
 template <typename TData, typename TIndex>
 std::vector<TIndex>
-argsort(std::vector<TData>& data, const std::function<bool(const TIndex&, const TIndex&)>& comp)
+argsort(std::vector<TData>& data, const std::function<bool(const TIndex, const TIndex)>& comp)
 {
     return std::get<0>(argsort(data, comp, false));
 }
@@ -108,7 +108,7 @@ void find_sequences
     )>& value_extractor,
     const std::function<void
     (
-        const TIndex&, const TIndex&
+        const TIndex, const TIndex
     )>& process_sequence
 )
 {
