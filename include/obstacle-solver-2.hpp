@@ -1,5 +1,4 @@
 #pragma once
-#include <cmath>
 #include <vector>
 #include <tuple>
 
@@ -16,12 +15,12 @@ private:
     const zone_idx_t terminal_idx;
 
 
-    zone_coord_dist_t dist(const ZoneInfo &a, const ZoneInfo &b)
+    zone_coord2_t dist2(const ZoneInfo &a, const ZoneInfo &b)
     {
         const zone_coord2_t dx = (zone_coord2_t)a.x - (zone_coord2_t)b.x;
         const zone_coord2_t dy = (zone_coord2_t)a.y - (zone_coord2_t)b.y;
 
-        return sqrt(dx * dx + dy * dy);
+        return dx * dx + dy * dy;
     }
 
     zone_coord2_t cross(const ZoneInfo& o, const ZoneInfo& a, const ZoneInfo& b)

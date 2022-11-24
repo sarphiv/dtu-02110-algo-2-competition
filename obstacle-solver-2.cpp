@@ -103,12 +103,12 @@ void ObstacleSolver2::solve()
             // Search for furthest point, which intuitively is on the convex hull
             zone_idx_t furthest_idx = zone.idx;
             zone_idx_t furthest_rank = zone_curr_rank;
-            zone_coord_dist_t furthest_dist = 0;
+            zone_coord2_t furthest_dist = 0;
 
             for (zone_idx_t j = 0; j < hull.size(); j++)
             {
                 ZoneInfo zone_hull = hull[j];
-                zone_coord_dist_t d = dist(zone, zone_hull);
+                zone_coord2_t d = dist2(zone, zone_hull);
 
                 // If distance is greater than furthest distance, update
                 // NOTE: In case of same distance, the lowest index zone is chosen

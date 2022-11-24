@@ -61,7 +61,10 @@ void ObstacleSolver3::solve()
 
 
             // Increment slope zone counter
-            // NOTE: dx is never negative, and if dx == 0, then dy > 0, so always +inf
+            // NOTE: dx is never negative, and if dx == 0, then dy > 0, so always +inf if infinite
+            // NOTE: Somehow the floating point math is accurate enough for hashing.
+            //  Guessing it is because only one floating point operation happens on fully accurate numbers,
+            //  so errors newer get to compound inconsistently.
             const double slope = 
                   (double)((zone_coord_signed_t)zone_j.y - (zone_coord_signed_t)zone_i.y) 
                 / (double)(zone_j.x - zone_i.x);
