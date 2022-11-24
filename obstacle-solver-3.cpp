@@ -2,7 +2,10 @@
 #include <tuple>
 #include <numeric>
 
-#include "emhash.h"
+// #define EMH_REHASH_LOG 1
+#define EMH_SIZE_TYPE_64BIT 1
+#define EMH_LRU_SET 1
+#include "emhash7.hpp"
 
 #include "common.hpp"
 #include "obstacle-solver-3.hpp"
@@ -13,13 +16,17 @@ struct hash_double
 {
     inline std::size_t operator()(const double& val) const
     {
-        // Based upon xxHash at: https://github.com/Cyan4973/xxHash
+        // NOTE: No need to handle -0.0 vs. 0.0 because never -0.0.
+        //  This is because delta_x further below is >= 0.0,
+        //  and all points are unique.
+
+        // // Based upon xxHash at: https://github.com/Cyan4973/xxHash
         int64_t hash = *((int64_t*)(&val));
         hash ^= hash >> 33;
         hash *= 14029467366897019727UL;
         hash ^= hash >> 29;
-        hash *= 1609587929392839161UL;
-        hash ^= hash >> 32;
+        // hash *= 1609587929392839161UL;
+        // hash ^= hash >> 32;
         return hash;
     }
 };
@@ -29,8 +36,8 @@ void ObstacleSolver3::solve()
 {
     // Counter for zones on the same line (all lines go through zone_i)
     // NOTE: Defined out here to avoid reallocating memory
-    emhash8::HashMap<double, zone_idx_t, hash_double> slope_counter;
-    slope_counter.reserve(zones_sorted.size()*2);
+    emhash7::HashMap<double, zone_idx_t, hash_double> slope_counter;
+    slope_counter.reserve(zones_sorted.size()*1.7);
     slope_counter.max_load_factor(0.6);
 
 
