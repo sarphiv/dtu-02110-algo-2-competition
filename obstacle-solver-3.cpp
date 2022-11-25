@@ -25,7 +25,7 @@ void ObstacleSolver3::solve()
     // Counter for zones on the same line (all lines go through zone_i)
     // NOTE: Defined out here to avoid reallocating memory
     emhash7::HashMap<int64_t, zone_idx_t> slope_counter;
-    slope_counter.reserve(zones_size*1.7);
+    slope_counter.reserve(zones_size*4);
     slope_counter.max_load_factor(0.6);
     
     // Temporary cache storage for slopes
