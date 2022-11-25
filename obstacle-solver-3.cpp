@@ -80,7 +80,7 @@ void ObstacleSolver3::solve()
                 //  A virtual output node is an input node also working as an output node.
 
                 // If capacity available, add edge from zone_i to zone_j
-                if ((zone_i.capacity[O3] > 0))
+                if (zone_i.capacity[O3] > 0)
                     graph.add_zone_edge
                     (
                         zone_i.idx,
