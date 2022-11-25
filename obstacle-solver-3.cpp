@@ -1,8 +1,5 @@
-#include <list>
-#include <tuple>
-#include <numeric>
-
 // #define EMH_REHASH_LOG 1
+// #define EMH_STATIS 1
 #define EMH_SIZE_TYPE_64BIT 1
 #define EMH_LRU_SET 1
 #include "emhash7.hpp"
@@ -12,37 +9,29 @@
 
 
 
-struct hash_double
-{
-    inline std::size_t operator()(const double& val) const
-    {
-        // NOTE: No need to handle -0.0 vs. 0.0 because never -0.0.
-        //  This is because delta_x further below is >= 0.0,
-        //  and all points are unique.
-
-        // // Based upon xxHash at: https://github.com/Cyan4973/xxHash
-        int64_t hash = *((int64_t*)(&val));
-        hash ^= hash >> 33;
-        hash *= 14029467366897019727UL;
-        hash ^= hash >> 29;
-        // hash *= 1609587929392839161UL;
-        // hash ^= hash >> 32;
-        return hash;
-    }
-};
-
-
 void ObstacleSolver3::solve()
 {
+    // NOTE: Lots of comments because this function is the bottleneck of the program.
+    //  Lots of crazy optimization for the hash map has been tried, measured, and discarded.
+    //  The below are the ones that worked.
+
+
+    // Cache zones_sorted size
+    // NOTE: This actually helps by a few percentage points - was measured.
+    const zone_idx_t zones_size = zones_sorted.size();
+
     // Counter for zones on the same line (all lines go through zone_i)
     // NOTE: Defined out here to avoid reallocating memory
-    emhash7::HashMap<double, zone_idx_t, hash_double> slope_counter;
-    slope_counter.reserve(zones_sorted.size()*1.7);
+    emhash7::HashMap<int64_t, zone_idx_t> slope_counter;
+    slope_counter.reserve(zones_size*1.7);
     slope_counter.max_load_factor(0.6);
+    
+    // Temporary cache storage for slopes
+    std::vector<double> slopes(zones_size);
 
 
     // Loop through all zones sorted by x and y
-    for (zone_idx_t i = 0; i < zones_sorted.size(); ++i)
+    for (zone_idx_t i = 0; i < zones_size; ++i)
     {
         // Cache first zone
         const auto& zone_i = zones_sorted[i];
@@ -54,27 +43,44 @@ void ObstacleSolver3::solve()
         // Loop through all zones "in front"
         // NOTE: Have to loop through even if there is no capacity.
         //  This is because zones in front need to connect back to this zone.
-        for (zone_idx_t j = i+1; j < zones_sorted.size(); ++j)
-        {
-            // Cache second zone
-            const auto& zone_j = zones_sorted[j];
-
-
+        // NOTE: Doing it over two loops because of better performance through cache locality and vectorization.
+        //  This comes at the cost of increased space usage via the slopes vector.
+        for (zone_idx_t j = i+1; j < zones_size; ++j)
             // Increment slope zone counter
             // NOTE: dx is never negative, and if dx == 0, then dy > 0, so always +inf if infinite
             // NOTE: Somehow the floating point math is accurate enough for hashing.
             //  Guessing it is because only one floating point operation happens on fully accurate numbers,
             //  so errors newer get to compound inconsistently.
-            const double slope = 
-                  (double)((zone_coord_signed_t)zone_j.y - (zone_coord_signed_t)zone_i.y) 
-                / (double)(zone_j.x - zone_i.x);
+            slopes[j] = (double)((zone_coord_signed_t)zones_sorted[j].y - (zone_coord_signed_t)zone_i.y) 
+                / (double)(zones_sorted[j].x - zone_i.x);
 
-            const auto count = ++slope_counter[slope];
+
+        // Loop through all zones processed above, this time to add edges
+        for (zone_idx_t j = i+1; j < zones_size; ++j)
+        {
+            // Manually hash slope to integer outside of emhash.
+            // NOTE: Increases performance since integers have identity hash in emhash by default.
+            //  Also, this is faster than giving emhash a custom hasher.
+            // NOTE: No need to handle -0.0 vs. 0.0 because never -0.0.
+            //  This is because delta_x is always >= 0.0, and all points are unique.
+
+            // // Based upon xxHash at: https://github.com/Cyan4973/xxHash
+            int64_t hash = *((int64_t*)(&slopes[j]));
+            hash ^= hash >> 33;
+            hash *= 14029467366897019727UL;
+            hash ^= hash >> 29;
+            // NOTE: Uncommented because of increased speed for large inputs,
+            //  while little to no difference for small inputs.
+            // hash *= 1609587929392839161UL;
+            // hash ^= hash >> 32;
 
 
             // If more than two zones are in front of zone_i on the same line, add edges.
-            if (count > 2)
+            if (++slope_counter[hash] > 2)
             {
+                // Cache second zone
+                const auto& zone_j = zones_sorted[j];
+
                 // NOTE: Edges are not mirrored. 
                 //  The edges start from real output nodes rather than virtual output nodes.
                 //  A virtual output node is an input node also working as an output node.

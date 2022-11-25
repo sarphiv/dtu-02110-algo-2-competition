@@ -3,6 +3,13 @@
 # CFLAGS = -g -Wall
 # LDFLAGS = -g -L.
 # LDLIBS =
+
+# CC = gcc
+# CXXFLAGS = -Wall -g -fno-omit-frame-pointer -O3 -Iinclude
+# CFLAGS = -Wall
+# LDFLAGS = -L.
+# LDLIBS = 
+
 CC = gcc
 CXXFLAGS = -Wall -O3 -Iinclude
 CFLAGS = -Wall
