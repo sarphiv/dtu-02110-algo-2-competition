@@ -1,0 +1,21 @@
+common-templates.hpp:1:9: warning: #pragma once in main file
+    1 | #pragma once
+      |         ^~~~
+common.hpp:1:9: warning: #pragma once in main file
+    1 | #pragma once
+      |         ^~~~
+flow-graph.hpp:1:9: warning: #pragma once in main file
+    1 | #pragma once
+      |         ^~~~
+obstacle-solver-1.hpp:1:9: warning: #pragma once in main file
+    1 | #pragma once
+      |         ^~~~
+obstacle-solver-2.hpp:1:9: warning: #pragma once in main file
+    1 | #pragma once
+      |         ^~~~
+obstacle-solver-3.hpp:1:9: warning: #pragma once in main file
+    1 | #pragma once
+      |         ^~~~
+obstacle-solver-4.hpp:1:9: warning: #pragma once in main file
+    1 | #pragma once
+      |         ^~~~
