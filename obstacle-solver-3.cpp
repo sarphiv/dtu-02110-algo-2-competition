@@ -1,3 +1,5 @@
+#include <vector>
+
 // #define EMH_REHASH_LOG 1
 // #define EMH_STATIS 1
 #define EMH_SIZE_TYPE_64BIT 1

@@ -1,3 +1,5 @@
+#include <vector>
+
 #include "common.hpp"
 #include "common-templates.hpp"
 #include "obstacle-solver-1.hpp"

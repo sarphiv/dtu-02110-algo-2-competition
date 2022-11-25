@@ -1,6 +1,5 @@
 #pragma once
 #include <algorithm>
-#include <numeric>
 #include <vector>
 #include <tuple>
 #include <functional>
@@ -10,12 +9,12 @@
 
 template <typename TData, typename TIndex>
 std::tuple<std::vector<TIndex>, std::vector<TIndex>>
-argsort(const TIndex& size, const std::function<bool(const TIndex, const TIndex)>& comp, const bool inverse_index)
+argsort(const TIndex size, const std::function<bool(const TIndex, const TIndex)>& comp, const bool inverse_index)
 {
-
     // Get indexes to sort
     std::vector<TIndex> idx(size);
-    std::iota(idx.begin(), idx.end(), 0);
+    for (TIndex i = 0; i < size; ++i)
+        idx[i] = i;
 
     // Get sorted indexes
     std::sort
@@ -44,7 +43,7 @@ argsort(const TIndex& size, const std::function<bool(const TIndex, const TIndex)
 
 template <typename TData, typename TIndex>
 std::vector<TIndex>
-argsort(const TIndex& size, const std::function<bool(const TIndex, const TIndex)>& comp)
+argsort(const TIndex size, const std::function<bool(const TIndex, const TIndex)>& comp)
 {
     return std::get<0>(argsort<TData, TIndex>(size, comp, false));
 }
@@ -142,7 +141,3 @@ void find_sequences
     if (start != end)
         process_sequence(start, end);
 }
-
-
-
-// TODO: binary search for closest element

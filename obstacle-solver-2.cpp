@@ -1,5 +1,5 @@
+#include <vector>
 #include <tuple>
-#include <array>
 
 #include "common.hpp"
 #include "obstacle-solver-2.hpp"
