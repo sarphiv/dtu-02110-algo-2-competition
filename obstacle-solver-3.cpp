@@ -68,11 +68,15 @@ void ObstacleSolver3::solve()
 
             // // Based upon xxHash at: https://github.com/Cyan4973/xxHash
             int64_t hash = *((int64_t*)(&slopes[j]));
-            hash ^= hash >> 33;
-            hash *= 14029467366897019727UL;
+            hash = ((hash^(hash >> 33)) * 14029467366897019727UL);
             hash ^= hash >> 29;
-            // NOTE: Uncommented because of increased speed for large inputs,
+            // NOTE: Only using half of hash function 
+            //  because of increased speed for large inputs,
             //  while little to no difference for small inputs.
+            //  The below is the original hash function.
+            // hash ^= hash >> 33;
+            // hash *= 14029467366897019727UL;
+            // hash ^= hash >> 29;
             // hash *= 1609587929392839161UL;
             // hash ^= hash >> 32;
 

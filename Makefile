@@ -5,9 +5,9 @@
 # LDLIBS =
 
 # CC = gcc
-# CXXFLAGS = -Wall -g -fno-omit-frame-pointer -O3 -Iinclude
+# CXXFLAGS = -Wall -g -ggdb -fno-omit-frame-pointer -O3 -Iinclude
 # CFLAGS = -Wall
-# LDFLAGS = -L.
+# LDFLAGS = -ggdb -L.
 # LDLIBS = 
 
 CC = gcc
