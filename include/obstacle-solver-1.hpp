@@ -9,13 +9,14 @@ class ObstacleSolver1
 {
 private:
     FlowGraph& graph;
-    const std::vector<ZoneInfo>& zones_sorted;
+    const ZoneInfos& zones_sorted;
 
 
     void connect_range
     (
-        const std::vector<ZoneInfo>& zones,
-        const zone_idx_t start, 
+        const std::vector<zone_idx_t>& zone_idx,
+        const std::vector<zone_capacity_t>& zone_cap,
+        const zone_idx_t start,
         const zone_idx_t end
     );
 
@@ -25,7 +26,7 @@ public:
     ObstacleSolver1
     (
         FlowGraph& graph, 
-        const std::vector<ZoneInfo>& zones_sorted
+        const ZoneInfos& zones_sorted
     )
         : graph(graph), zones_sorted(zones_sorted)
     {

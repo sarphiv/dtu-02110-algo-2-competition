@@ -5,7 +5,7 @@
 
 
 
-FlowGraph::FlowGraph(const std::vector<ZoneInfo>& zones, const zone_idx_t source, const zone_idx_t terminal)
+FlowGraph::FlowGraph(const ZoneInfos& zones, const zone_idx_t source, const zone_idx_t terminal)
     : zones(zones), 
     source(get_input(source)), terminal(get_input(terminal)),
     // NOTE: Not adding more, because terminal node has no output nodes
@@ -16,8 +16,7 @@ FlowGraph::FlowGraph(const std::vector<ZoneInfo>& zones, const zone_idx_t source
     height(node_size, 0), count(node_size+2, 0),
     discharge_stack(node_size, std::vector<node_idx_t>()),
     active(node_size, false),
-    active_max_height(0),
-    terminal_base_offset(0)
+    active_max_height(0)
 {
     // Mark terminal as enqueued to prevent requeueing
     //  as there should never be a discharge from the terminal
@@ -28,28 +27,25 @@ FlowGraph::FlowGraph(const std::vector<ZoneInfo>& zones, const zone_idx_t source
 
 
     // Add all internal edges for each zone
-    for (zone_idx_t i = 0; i < zones.size(); ++i)
+    for (zone_idx_t i = 0; i < zones.size; ++i)
     {
-        // Cache zone info
-        const auto zone = zones[i];
-
         // Add internal edge for obstacle O1
-        if (zone.capacity[O1] > 0)
+        if (zones.capacity[O1][i] > 0)
             add_node_edge
             (
-                get_input(zone.idx),
-                get_output(zone.idx, O1),
-                zone.capacity[O1],
+                get_input(zones.idx[i]),
+                get_output(zones.idx[i], O1),
+                zones.capacity[O1][i],
                 0
             );
 
         // Add internal edge for obstacle O3
-        if (zone.capacity[O3] > 0)
+        if (zones.capacity[O3][i] > 0)
             add_node_edge
             (
-                get_input(zone.idx),
-                get_output(zone.idx, O3),
-                zone.capacity[O3],
+                get_input(zones.idx[i]),
+                get_output(zones.idx[i], O3),
+                zones.capacity[O3][i],
                 0
             );
     }
@@ -171,7 +167,8 @@ void FlowGraph::push(Edge& edge)
 void FlowGraph::relabel_gap(node_idx_t height_limit)
 {
     // Loop through all heights for nodes
-    for (node_idx_t node_idx = 0; node_idx < height.size(); node_idx++) 
+    const node_idx_t height_size = height.size();
+    for (node_idx_t node_idx = 0; node_idx < height_size; node_idx++) 
     {
         // If node is above or equal to limit, 
         //  ensure it is at least node_size high and enqueue for discharge (likely relabel)

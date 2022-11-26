@@ -26,7 +26,7 @@ public:
 
 
 private:
-    const std::vector<ZoneInfo>& zones;
+    const ZoneInfos& zones;
     const node_idx_t source, terminal;
     const node_idx_t node_size;
 
@@ -55,19 +55,15 @@ private:
     
 
 public:
-    node_idx_t terminal_base_offset;
+    FlowGraph(const ZoneInfos& zones, const zone_idx_t source, const zone_idx_t terminal);
 
 
-    FlowGraph() = default;
-    FlowGraph(const std::vector<ZoneInfo>& zones, const zone_idx_t source, const zone_idx_t terminal);
-
-
-    node_idx_t get_input(zone_idx_t zone_idx) const
+    node_idx_t get_input(const zone_idx_t zone_idx) const
     {
         return (node_idx_t)zone_idx * ZONE_OBSTACLE_NODE_STRIDE;
     }
 
-    node_idx_t get_output(zone_idx_t zone_idx, zone_obstacle_val_t obstacle) const
+    node_idx_t get_output(const zone_idx_t zone_idx, const zone_obstacle_val_t obstacle) const
     {
         switch (obstacle)
         {
@@ -88,9 +84,7 @@ public:
 
     node_idx_t get_terminal_offset(const ZoneInfo& zone) const
     {
-        return terminal_base_offset +
-            (zone.capacity[O1] > 0) +
-            (zone.capacity[O3] > 0);
+        return (zone.capacity[O1] > 0) + (zone.capacity[O3] > 0);
     }
 
 

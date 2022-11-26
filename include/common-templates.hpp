@@ -96,15 +96,23 @@ argsort(std::vector<TData>& data)
 }
 
 
+template <typename TData, typename TIndex>
+void
+argsort(std::vector<TData>& data, const std::vector<TIndex>& idx)
+{
+    // Copy vector
+    const std::vector<TData> data_orig = data;
 
-template <typename TData, typename TValue, typename TIndex>
+    // Sort by indexes
+    for (TIndex i = 0; i < data.size(); i++)
+        data[i] = data_orig[idx[i]];
+}
+
+
+template <typename TData, typename TIndex>
 void find_sequences
 (
     const std::vector<TData>& data,
-    const std::function<TValue
-    (
-        const TData& data
-    )>& value_extractor,
     const std::function<void
     (
         const TIndex, const TIndex
@@ -118,11 +126,11 @@ void find_sequences
     //  and finding sequences of equal values
     TIndex start = 0;
     TIndex end = 0;
-    TValue prev_val = value_extractor(data[0]);
+    TData prev_val = data[0];
 
     for (TIndex i = 1; i < size; i++)
     {
-        TValue val = value_extractor(data[i]);
+        TData val = data[i];
 
         if (prev_val != val)
         {

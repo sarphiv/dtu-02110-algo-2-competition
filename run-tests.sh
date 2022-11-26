@@ -13,3 +13,6 @@ for test_input in tests/*.in; do
         echo "Bug in test script for path: $test_input"
     fi
 done
+
+
+exit 0

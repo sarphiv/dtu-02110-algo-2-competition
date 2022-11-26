@@ -20,7 +20,7 @@ void ObstacleSolver3::solve()
 
     // Cache zones_sorted size
     // NOTE: This actually helps by a few percentage points - was measured.
-    const zone_idx_t zones_size = zones_sorted.size();
+    const zone_idx_t zones_size = zones_sorted.size;
 
     // Counter for zones on the same line (all lines go through zone_i)
     // NOTE: Defined out here to avoid reallocating memory
@@ -36,7 +36,7 @@ void ObstacleSolver3::solve()
     for (zone_idx_t i = 0; i < zones_size; ++i)
     {
         // Cache first zone
-        const auto& zone_i = zones_sorted[i];
+        const auto zone_i = zones_sorted[i];
 
         // Clear slope counter to count for current zone_i only
         slope_counter.clear();
@@ -53,8 +53,8 @@ void ObstacleSolver3::solve()
             // NOTE: Somehow the floating point math is accurate enough for hashing.
             //  Guessing it is because only one floating point operation happens on fully accurate numbers,
             //  so errors newer get to compound inconsistently.
-            slopes[j] = (double)((zone_coord_signed_t)zones_sorted[j].y - (zone_coord_signed_t)zone_i.y) 
-                / (double)(zones_sorted[j].x - zone_i.x);
+            slopes[j] = (double)((zone_coord_signed_t)zones_sorted.y[j] - (zone_coord_signed_t)zone_i.y) 
+                      / (double)(                     zones_sorted.x[j] -                      zone_i.x);
 
 
         // Loop through all zones processed above, this time to add edges
@@ -85,7 +85,8 @@ void ObstacleSolver3::solve()
             if (++slope_counter[hash] > 2)
             {
                 // Cache second zone
-                const auto& zone_j = zones_sorted[j];
+                const auto zone_j_idx = zones_sorted.idx[j];
+                const auto zone_j_cap = zones_sorted.capacity[O3][j];
 
                 // NOTE: Edges are not mirrored. 
                 //  The edges start from real output nodes rather than virtual output nodes.
@@ -96,19 +97,19 @@ void ObstacleSolver3::solve()
                     graph.add_zone_edge
                     (
                         zone_i.idx,
-                        zone_j.idx,
+                        zone_j_idx,
                         O3,
                         zone_i.capacity[O3]
                     );
 
                 // If capacity available, add edge from zone_j to zone_i
-                if (zone_j.capacity[O3] > 0)
+                if (zone_j_cap > 0)
                     graph.add_zone_edge
                     (
-                        zone_j.idx,
+                        zone_j_idx,
                         zone_i.idx,
                         O3,
-                        zone_j.capacity[O3]
+                        zone_j_cap
                     );
             }
         }

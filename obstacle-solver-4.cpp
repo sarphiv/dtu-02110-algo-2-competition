@@ -4,13 +4,13 @@
 
 void ObstacleSolver4::solve()
 {
-    for (const auto& zone : zones)
-        if (zone.capacity[O4] > 0)
+    for (zone_idx_t i = 0; i < zones.size; ++i)
+        if (zones.capacity[O4][i] > 0)
             graph.add_zone_edge
             (
-                zone.idx,
+                zones.idx[i],
                 terminal_idx,
                 O4,
-                zone.capacity[O4]
+                zones.capacity[O4][i]
             );
 }

@@ -12,7 +12,7 @@
 #include "flow-graph.hpp"
 
 
-std::vector<ZoneInfo>
+ZoneInfos
 load_zones(std::istream& stream)
 {
     // Load zone amount
@@ -20,24 +20,20 @@ load_zones(std::istream& stream)
     stream >> n;
 
     // Load zones
-    std::vector<ZoneInfo> zones(n);
+    ZoneInfos zones(n);
 
     for (zone_idx_t i = 0; i < n; ++i)
     {
-        ZoneInfo zone;
-
         stream 
-            >> zone.x >> zone.y 
-            >> zone.capacity[0] >> zone.capacity[1] 
-            >> zone.capacity[2] >> zone.capacity[3];
-        zone.idx = i;
+            >> zones.x[i] >> zones.y[i] 
+            >> zones.capacity[0][i] >> zones.capacity[1][i] 
+            >> zones.capacity[2][i] >> zones.capacity[3][i];
 
-
-        zones[i] = zone;
+        zones.idx[i] = i;
     }
 
 
-    // Return vector of zones
+    // Return zones keyed by member
     return zones;
 }
 
@@ -59,22 +55,30 @@ int main(int argc, char *argv[])
             return load_zones(std::cin);
     }();
 
+
     // Disallow terminal zone from connecting out
-    const zone_idx_t terminal_idx = zones.size() - 1;
+    const zone_idx_t terminal_idx = zones.size - 1;
     {
-        auto& terminal = zones[terminal_idx];
-        terminal.capacity[O1] = 0; terminal.capacity[O2] = 0; terminal.capacity[O3] = 0; terminal.capacity[O4] = 0;
+        for (zone_obstacle_val_t o = 0; o < ZONE_OBSTACLE_SIZE; ++o)
+            zones.capacity[o][terminal_idx] = 0;
     }
 
+
     // Sort zones by x then y
-    argsort<ZoneInfo, zone_idx_t>
+    const auto zones_idx = argsort<zone_idx_t, zone_idx_t>
     (
-        zones,
+        zones.idx,
         [&](const zone_idx_t &a, const zone_idx_t &b)
         {
-            return (zones[a].x < zones[b].x) | ((zones[a].x == zones[b].x) & (zones[a].y < zones[b].y));
+            return (zones.x[a] < zones.x[b]) | ((zones.x[a] == zones.x[b]) & (zones.y[a] < zones.y[b]));
         }
     );
+
+    argsort(zones.x, zones_idx);
+    argsort(zones.y, zones_idx);
+    for (zone_obstacle_val_t o = 0; o < ZONE_OBSTACLE_SIZE; ++o)
+        argsort(zones.capacity[o], zones_idx);
+
 
 
     // Create flow graph

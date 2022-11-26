@@ -9,7 +9,7 @@ class ObstacleSolver3
 {
 private:
     FlowGraph& graph;
-    const std::vector<ZoneInfo>& zones_sorted;
+    const ZoneInfos& zones_sorted;
 
 
 public:
@@ -17,7 +17,7 @@ public:
     ObstacleSolver3
     (
         FlowGraph& graph, 
-        const std::vector<ZoneInfo>& zones_sorted
+        const ZoneInfos& zones_sorted
     )
         : graph(graph), zones_sorted(zones_sorted)
     {
