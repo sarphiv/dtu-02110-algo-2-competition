@@ -93,11 +93,4 @@
         "variant": "cpp",
         "*.old": "cpp"
     },
-    "makefile.launchConfigurations": [
-        {
-            "cwd": "/home/saps/synced/cloud-sync/Education/DTU/02110-algorithms-data-structures-2/assignments/2/code",
-            "binaryPath": "/home/saps/synced/cloud-sync/Education/DTU/02110-algorithms-data-structures-2/assignments/2/code/main",
-            "binaryArgs": []
-        }
-    ]
 }
