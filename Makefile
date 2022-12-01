@@ -1,20 +1,11 @@
-# CC = gcc -g
-# CXXFLAGS = -g -Wall -Iinclude
-# CFLAGS = -g -Wall
-# LDFLAGS = -g -L.
-# LDLIBS =
-
-# CC = gcc
-# CXXFLAGS = -Wall -g -ggdb -fno-omit-frame-pointer -O3 -Iinclude
-# CFLAGS = -Wall
-# LDFLAGS = -ggdb -L.
-# LDLIBS = 
-
 CC = gcc
-CXXFLAGS = -Wall -O3 -Iinclude
-CFLAGS = -Wall
 LDFLAGS = -L.
-LDLIBS = 
+LDLIBS =
+VPATH = src
+
+# CXXFLAGS = -g -Wall -Iinclude
+# CXXFLAGS = -Wall -g -ggdb -fno-omit-frame-pointer -O3 -Iinclude
+CXXFLAGS = -Wall -O3 -Iinclude
 
 .PHONY: clean
 
