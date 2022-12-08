@@ -2,6 +2,10 @@
 
 // #define EMH_REHASH_LOG 1
 // #define EMH_STATIS 1
+// TODO: According to ktprime (of emhash) EMH_SIZE_TYPE_64BIT should be removed.
+//  Check https://github.com/sarphiv/dtu-02110-algo-2-competition/issues/1
+//  The suggestion was posted after the competition ended so for preservation reasons,
+//  no changes to the code will be made - only this comment will be added for readers.
 #define EMH_SIZE_TYPE_64BIT 1
 #define EMH_LRU_SET 1
 #include "emhash7.hpp"
@@ -115,3 +119,4 @@ void ObstacleSolver3::solve()
         }
     }
 }
+
